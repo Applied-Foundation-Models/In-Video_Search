@@ -19,6 +19,11 @@ ffmpeg = "^1.4"
 scikit-image = "^0.23.2"
 scikit-learn = "^1.4.2"
 hdbscan = { version = "^0.8.33", optional = true }
+yt-dlp = "^2024.4.9"
+openai-whisper = {git = "https://github.com/openai/whisper.git"}
+moviepy = "^1.0.3"
+pandas = "^2.2.2"
+optparse-pretty = "^0.1.1"
 
 [tool.poetry.extras]
 use_hdbscan = ["hdbscan"]
