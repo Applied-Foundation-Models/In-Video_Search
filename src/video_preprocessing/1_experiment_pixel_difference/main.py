@@ -50,4 +50,4 @@ def extract_keyframes(video_path, threshold=0.2):
 
 # Example usage
 video_path = 'mathe_1.mp4'
-extract_keyframes(video_path, threshold=0.2)
+extract_keyframes(video_path, threshold=0.1)
