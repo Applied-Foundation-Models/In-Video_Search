@@ -7,6 +7,21 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
+transformers = "^4.40.2"
+huggingface-hub = "^0.23.0"
+torch = "^2.3.0"
+image = "^1.5.33"
+jupyter = "^1.0.0"
+matplotlib = "^3.8.4"
+opencv-python-headless = "^4.9.0.80"
+opencv-python = "^4.9.0.80"
+ffmpeg = "^1.4"
+scikit-image = "^0.23.2"
+scikit-learn = "^1.4.2"
+hdbscan = { version = "^0.8.33", optional = true }
+
+[tool.poetry.extras]
+use_hdbscan = ["hdbscan"]
 
 
 [build-system]
