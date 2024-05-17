@@ -1,5 +1,6 @@
-import cv2
 import os
+
+import cv2
 
 # Set the path to the video file
 
@@ -25,15 +26,15 @@ if not cap.isOpened():
 # Get the total number of seconds in the video
 video_length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) / cap.get(cv2.CAP_PROP_FPS))
 
-# Loop through the video at intervals of 10 seconds
-for timestamp in range(0, video_length, interval):
-    # Check if frame was successfully read
-    if ret:
-        # Save the frame as an image file
-        cv2.imwrite(f'frame_at_{timestamp}_seconds.jpg', frame)
-        print(f"Frame at {timestamp} seconds saved successfully.")
-    else:
-        print(f"Error: Could not read frame at {timestamp} seconds.")
+# # Loop through the video at intervals of 10 seconds
+# for timestamp in range(0, video_length, interval):
+#     # Check if frame was successfully read
+#     if ret:
+#         # Save the frame as an image file
+#         cv2.imwrite(f"frame_at_{timestamp}_seconds.jpg", frame)
+#         print(f"Frame at {timestamp} seconds saved successfully.")
+#     else:
+#         print(f"Error: Could not read frame at {timestamp} seconds.")
 
 # When everything done, release the video capture object
 cap.release()

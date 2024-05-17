@@ -1,27 +1,21 @@
 from __future__ import print_function
 
 import os
-from glob import glob
-import tempfile
+
 import cv2
+import hdbscan
+
+# from multiprocessing import Pool, Process, cpu_count
 import numpy as np
-from sklearn.cluster import KMeans
 from skimage.filters.rank import entropy
 from skimage.morphology import disk
-import hdbscan
-# from multiprocessing import Pool, Process, cpu_count
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-import time
-
-from extracting_candidate_frames import Configs as config
 
 
 class ImageSelector(object):
-    """Class for selection of best top N images from input list of images, Currently following selection method are implemented:
-    brightness filtering, contrast/entropy filtering, clustering of frames and variance of laplacian for non blurred images
-    selection
+    """Class for selection of best top N images from input list of images.
+    Currently following selection method are implemented:
+    brightness filtering, contrast/entropy filtering, clustering of frames
+    and variance of laplacian for non blurred images selection.
     :param object: base class inheritance
     :type object: class:`Object`
     """
@@ -87,7 +81,7 @@ class ImageSelector(object):
         return cv2.Laplacian(image, cv2.CV_64F).var()
 
     def __filter_optimum_brightness_and_contrast_images__(self, input_img_files):
-        """ Internal function for selection of given input images with following parameters :optimum brightness and contrast range ,
+        """Internal function for selection of given input images with following parameters :optimum brightness and contrast range ,
         returns array of image files which are in optimum brigtness and contrast/entropy range.
 
         :param object: base class inheritance
@@ -99,18 +93,22 @@ class ImageSelector(object):
         """
 
         n_files = len(input_img_files)
-        # -------- calculating the brightness and entropy score by multiprocessing ------
-        brightness_score = np.asarray(list(map(self.__get_brighness_score__, input_img_files)))
+        # -------- calculating the brightness and entropy score by multiprocess
+        brightness_score = np.asarray(
+            list(map(self.__get_brighness_score__, input_img_files))
+        )
         # self.pool_obj.
         #     map(self.__get_brighness_score__, input_img_files)
         # )
 
-        entropy_score = np.asarray(list(map(self.__get_entropy_score__, input_img_files)))
+        entropy_score = np.asarray(
+            list(map(self.__get_entropy_score__, input_img_files))
+        )
         # self.pool_obj.
         #     map(self.__get_entropy_score__, input_img_files)
         # )
         # print(list(entropy_score))
-        # -------- Check if brightness and contrast scores are in the min and max defined range ------
+        # -------- Check if brightness and contrast scores are in the min and m
         brightness_ok = np.where(
             np.logical_and(
                 brightness_score > self.min_brightness_value,
@@ -128,7 +126,8 @@ class ImageSelector(object):
             False,
         )
 
-        # Returning only thos images which are have good brightness and contrast
+        # Returning only thos images which are have good brightness and
+        # contrast
 
         return [
             input_img_files[i]
@@ -137,7 +136,7 @@ class ImageSelector(object):
         ]
 
     def __prepare_cluster_sets__hdbscan(self, files):
-        """ Internal function for clustering input image files, returns array of indexs of each input file
+        """Internal function for clustering input image files, returns array of indexs of each input file
         (which determines which cluster a given file belongs)
 
         :param object: base class inheritance
@@ -150,7 +149,8 @@ class ImageSelector(object):
 
         # all_hists = []
         all_dst = []
-        # Calculating the histograms for each image and adding them into **all_hists** list or all_dst** list
+        # Calculating the histograms for each image and adding them into
+        # **all_hists** list or all_dst** list
         for img_file in files:
             # img1 = cv2.cvtColor(img_file, cv2.COLOR_BGR2GRAY)
             # # (thresh, img) = cv2.threshold(img1, 150, 255, cv2.THRESH_BINARY)
@@ -194,7 +194,7 @@ class ImageSelector(object):
         # 'sokalsneath': hdbscan.dist_metrics.SokalSneathDistance,
         # 'wminkowski': hdbscan.dist_metrics.WMinkowskiDistance}
         # Hdbascan = hdbscan.HDBSCAN(min_cluster_size=2,metric='manhattan').fit(all_hists)
-        Hdbascan = hdbscan.HDBSCAN(min_cluster_size=2, metric='manhattan').fit(all_dst)
+        Hdbascan = hdbscan.HDBSCAN(min_cluster_size=2, metric="manhattan").fit(all_dst)
         labels = np.add(Hdbascan.labels_, 1)
         nb_clusters = len(np.unique(Hdbascan.labels_))
         # x=self.__plots_for_clustering(Hdbascan,all_dst)
@@ -212,16 +212,21 @@ class ImageSelector(object):
                 files_clusters_index_array.append(index_array)
 
         files_clusters_index_array = np.array(files_clusters_index_array)
-        return files_clusters_index_array, files_clusters_index_array_of_only_one_image
+        return (
+            files_clusters_index_array,
+            files_clusters_index_array_of_only_one_image,
+        )
 
     def __plots_for_clustering(self, Hdbascan, all_dst):
         # cluster_spanning_tree = Hdbascan.minimum_spanning_tree_.plot(edge_cmap='viridis',
         #                                                             edge_alpha=0.6,
         #                                                             node_size=80,
         #                                                             # edge_linewidth=2)
-        single_linkage_tree_dst = Hdbascan.single_linkage_tree_.plot(cmap='viridis', colorbar=True)
+        single_linkage_tree_dst = Hdbascan.single_linkage_tree_.plot(
+            cmap="viridis", colorbar=True
+        )
         # cluster_spanning_tree.figure.savefig('cluster_spanning_tree_dst.jpeg')
-        single_linkage_tree_dst.figure.savefig('cluster_hierarchy_plot .jpeg')
+        single_linkage_tree_dst.figure.savefig("cluster_hierarchy_plot .jpeg")
 
     def __get_laplacian_scores(self, files, n_images):
         """Function to iteratre over each image in the cluster and calculates the laplacian/blurryness
@@ -247,9 +252,9 @@ class ImageSelector(object):
         return variance_laplacians
 
     def __get_best_images_index_from_each_cluster__(
-            self, files, files_clusters_index_array
+        self, files, files_clusters_index_array
     ):
-        """ Internal function returns index of one best image from each cluster
+        """Internal function returns index of one best image from each cluster
         :param object: base class inheritance
         :type object: class:`Object`
         :param files: list of input filenames
@@ -262,7 +267,8 @@ class ImageSelector(object):
 
         filtered_items = []
 
-        # Iterating over every image in each cluster to find the best images from every cluster
+        # Iterating over every image in each cluster to find the best images
+        # from every cluster
         clusters = np.arange(len(files_clusters_index_array))
         for cluster_i in clusters:
             curr_row = files_clusters_index_array[cluster_i][0]
@@ -272,23 +278,23 @@ class ImageSelector(object):
 
             # Selecting image with low burr(high laplacian) score
             try:
-                selected_frame_of_current_cluster = curr_row[np.argmax(variance_laplacians)]
+                selected_frame_of_current_cluster = curr_row[
+                    np.argmax(variance_laplacians)
+                ]
                 filtered_items.append(selected_frame_of_current_cluster)
-            except:
+            except BaseException:
                 break
 
         return filtered_items
 
     def __getstate__(self):
-        """Function to get the state of initialized class object and remove the pool object from it
-        """
+        """Function to get the state of initialized class object and remove the pool object from it"""
         self_dict = self.__dict__.copy()
         # del self_dict["pool_obj"]
         return self_dict
 
     def __setstate__(self, state):
-        """Function to update the state of initialized class object woth the pool object
-        """
+        """Function to update the state of initialized class object woth the pool object"""
         self.__dict__.update(state)
 
     def select_best_frames(self, input_key_frames, output_folder):
@@ -316,14 +322,19 @@ class ImageSelector(object):
         # and then selecting the best images from every cluster
         # if len(input_key_frames) >= self.nb_clusters:
         if len(input_key_frames) >= 1:
-            files_clusters_index_array, files_clusters_index_array_of_only_one_image = self.__prepare_cluster_sets__hdbscan(
-                input_key_frames)
+            (
+                files_clusters_index_array,
+                files_clusters_index_array_of_only_one_image,
+            ) = self.__prepare_cluster_sets__hdbscan(input_key_frames)
             selected_images_index = self.__get_best_images_index_from_each_cluster__(
                 input_key_frames, files_clusters_index_array
             )
-            files_clusters_index_array_of_only_one_image = [item for t in files_clusters_index_array_of_only_one_image
-                                                            for item in t]
-            files_clusters_index_array_of_only_one_image = files_clusters_index_array_of_only_one_image[0].tolist()
+            files_clusters_index_array_of_only_one_image = [
+                item for t in files_clusters_index_array_of_only_one_image for item in t
+            ]
+            files_clusters_index_array_of_only_one_image = (
+                files_clusters_index_array_of_only_one_image[0].tolist()
+            )
             selected_images_index.extend(files_clusters_index_array_of_only_one_image)
             for index in selected_images_index:
                 img = input_key_frames[index]
@@ -332,7 +343,7 @@ class ImageSelector(object):
             i = 0
             for images in files_clusters_index_array:
                 # try:
-                path = output_folder + '/' + str(i)
+                path = output_folder + "/" + str(i)
                 try:
                     if not os.path.isdir(output_folder):
                         os.mkdir(output_folder)
@@ -341,10 +352,13 @@ class ImageSelector(object):
                     print("Creation of the directory %s failed" % output_folder)
                 try:
                     os.makedirs(path)
-                except:
+                except BaseException:
                     pass
                 for image in images[0]:
-                    cv2.imwrite(os.path.join(path, str(image) + '.jpeg'), input_key_frames[image])
+                    cv2.imwrite(
+                        os.path.join(path, str(image) + ".jpeg"),
+                        input_key_frames[image],
+                    )
                 i = i + 1
         else:
             # if the imput candidate frames are less than a single cluster.
@@ -354,7 +368,7 @@ class ImageSelector(object):
         # saving clusters of single image cluster
         for images in files_clusters_index_array_of_only_one_image:
             print(files_clusters_index_array_of_only_one_image)
-            path = output_folder + '/' + str(i)
+            path = output_folder + "/" + str(i)
             try:
                 if not os.path.isdir(output_folder):
                     os.mkdir(output_folder)
@@ -363,9 +377,12 @@ class ImageSelector(object):
                 print("Creation of the directory %s failed" % output_folder)
             try:
                 os.makedirs(path)
-            except:
+            except BaseException:
                 pass
-            cv2.imwrite(os.path.join(path, str(image) + '.jpeg'), input_key_frames[image])
+            cv2.imwrite(
+                os.path.join(path, str(image) + ".jpeg"),
+                input_key_frames[image],
+            )
             i = i + 1
 
         return filtered_images_list

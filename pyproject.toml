@@ -24,10 +24,13 @@ openai-whisper = {git = "https://github.com/openai/whisper.git"}
 moviepy = "^1.0.3"
 pandas = "^2.2.2"
 optparse-pretty = "^0.1.1"
+pydub = "^0.25.1"
+tqdm = "^4.66.4"
+black = "^24.4.2"
+pre-commit = "^3.7.1"
 
 [tool.poetry.extras]
 use_hdbscan = ["hdbscan"]
-
 
 [build-system]
 requires = ["poetry-core"]

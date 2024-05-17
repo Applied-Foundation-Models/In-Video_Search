@@ -3,19 +3,14 @@ from __future__ import unicode_literals
 
 import os
 
-import cv2
 import moviepy.editor as mp
-import pandas as pd
-import yt_dlp
-from moviepy.editor import *
-from moviepy.editor import VideoFileClip
-from moviepy.video.tools.subtitles import SubtitlesClip
+from download_utils import extract_and_store_audio, split_video, transcribe_audio_files
 from yt_dlp import YoutubeDL
 
 import whisper
 
 
-def subtitle_video(
+def preprocess_video(
     download,
     url,
     aud_opts,
@@ -52,11 +47,19 @@ def subtitle_video(
     # First, this checks if your expermiment name is taken. If not, it will create the directory.
     # Otherwise, we will be prompted to retry with a new name
     basepath = os.getcwd()
-    path_to_data = os.path.join(basepath, "data", name)
+    path_to_data = os.path.join(basepath, "data/raw", name)
     try:
         os.makedirs(path_to_data, exist_ok=True)
         print("Starting AutoCaptioning...")
         print(f"Results will be stored in data/{name}")
+        video_chunks_dir = os.path.join(path_to_data, "video_chunks")
+        audio_chunks_dir = os.path.join(path_to_data, "audio_chunks")
+        transcriptions_dir = os.path.join(path_to_data, "transcriptions")
+
+        os.makedirs(video_chunks_dir, exist_ok=True)
+        os.makedirs(audio_chunks_dir, exist_ok=True)
+        os.makedirs(transcriptions_dir, exist_ok=True)
+        print("Created chunks folders")
 
     except Exception as e:
         return print(e)
@@ -67,109 +70,60 @@ def subtitle_video(
 
     URLS = [url]
     if download:
-        with YoutubeDL(aud_opts) as ydl:
-            ydl.download(url)
+        # with YoutubeDL(aud_opts) as ydl:
+        #     ydl.download(url)
         with YoutubeDL(vid_opts) as ydl:
             ydl.download(URLS)
     else:
         # Use local clip if not downloading from youtube
         my_clip = mp.VideoFileClip(uploaded_vid)
         my_clip.write_videofile(f"{path_to_data}/{input_file}")
-        my_clip.audio.write_audiofile(f"{path_to_data}/{audio_file}")
+        # my_clip.audio.write_audiofile(f"{path_to_data}/{audio_file}")
+
+    print("Splitting starts:")
+
+    # Call the split function
+    split_length = 30
+
+    split_video(
+        filename=f"{path_to_data}/{input_file}",
+        split_length=split_length,
+        output_dir=video_chunks_dir,
+        vcodec="copy",
+        acodec="copy",
+    )
+    extract_and_store_audio(video_chunks_dir, audio_chunks_dir)
+    print("Transcriptions starts")
 
     # Instantiate whisper model using model_type variable
+
     model = whisper.load_model(model_type)
 
-    # Get text from speech for subtitles from audio file
-    result = model.transcribe(
-        f"""{path_to_data}/{audio_file}""", task="translate", language=lang
-    )
-
-    print(f"Result output format{result}")
-
-    # create Subtitle dataframe, and save it
-    dict1 = {"start": [], "end": [], "text": []}
-    for i in result["segments"]:
-        dict1["start"].append(int(i["start"]))
-        dict1["end"].append(int(i["end"]))
-        dict1["text"].append(i["text"])
-
-    print(f"Transcription in dict format: {dict1}")
-    df = pd.DataFrame.from_dict(dict1)
-    df.to_csv(f"{path_to_data}/subs.csv")
-    vidcap = cv2.VideoCapture(f"""{path_to_data}/{input_file}""")
-    success, image = vidcap.read()
-    height = image.shape[0]
-    width = image.shape[1]
-
-    # Instantiate MoviePy subtitle generator with TextClip, subtitles, and SubtitlesClip
-    def generator(txt):
-        return TextClip(
-            txt,
-            font="P052-Bold",
-            fontsize=width / 50,
-            stroke_width=0.7,
-            color="white",
-            stroke_color="black",
-            size=(width, height * 0.25),
-            method="caption",
-        )
-
-    # generator = lambda txt: TextClip(txt, color='white', fontsize=20, font='Georgia-Regular',stroke_width=3, method='caption', align='south', size=video.size)
-    subs = tuple(
-        zip(tuple(zip(df["start"].values, df["end"].values)), df["text"].values)
-    )
-    subtitles = SubtitlesClip(subs, generator)
-
-    # Ff the file was on youtube, add the captions to the downloaded video
-    if download:
-        video = VideoFileClip(f"{path_to_data}/{input_file}")
-        final = CompositeVideoClip([video, subtitles.set_pos(("center", "bottom"))])
-        final.write_videofile(
-            f"{path_to_data}/{output}",
-            fps=video.fps,
-            remove_temp=True,
-            codec="libx264",
-            audio_codec="aac",
-        )
-    else:
-        # If the file was a local upload:
-        video = VideoFileClip(uploaded_vid)
-        final = CompositeVideoClip([video, subtitles.set_pos(("center", "bottom"))])
-        final.write_videofile(
-            f"{path_to_data}/{output}",
-            fps=video.fps,
-            remove_temp=True,
-            codec="libx264",
-            audio_codec="aac",
-        )
+    transcribe_audio_files(audio_chunks_dir, transcriptions_dir, model)
 
 
 def main():
-    # Options for youtube download to ensure we get a high quality audio file extraction.
-    # This is key, as extracting from the video in the same download seemed to significantly affect caption Word Error Rate in our experiments_download.
-    # Only modify these if needed. Lowered audio quality may inhibit the transcription's word error rate.
     opts_aud = {"format": "mp3/bestaudio/best", "keep-video": True}
-    # Options for youtube video to get right video file for final output
     opts_vid = {"format": "mp4/bestvideo/best"}
 
     # INSERT Youtube URL
-    URL = "https://www.youtube.com/watch?v=xFqpUWtuRZM"
+    URL = "https://www.youtube.com/watch?v=r11Lr4FILX8"
 
     # INSERT video name here
-    name = "your-filename"
-    subtitle_video(
+    name = "hitched"
+
+    preprocess_video(
         download=True,
         uploaded_vid="dune.mp4",  # path to local file
         url=URL,
         name=name,
         aud_opts=opts_aud,
         vid_opts=opts_vid,  # Video download settings
-        model_type="medium.en",  # change to 'large' if you want more accurate results,
+        model_type="small",  # change to 'large' if you want more accurate results,
         # change to 'medium.en' or 'large.en' for all english language tasks,
         # and change to 'small' or 'base' for faster inference
-        audio_file="audio.mp3",
-        input_file="dune.mp4", # TODO: Edit file_name here
+        audio_file=name + ".mp3",
+        input_file=name + ".mp4",
         output="output.mp4",
         lang="english",
     )
