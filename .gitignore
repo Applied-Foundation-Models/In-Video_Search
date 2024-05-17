@@ -1,0 +1,4 @@
+# Ignore IntelliJ IDEA project files
+.idea/
+# Ignore macOS system files
+.DS_Store
