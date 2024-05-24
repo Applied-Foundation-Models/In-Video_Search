@@ -66,4 +66,7 @@ Use the following command to download, chunk, and transcribe a video:
 
 ```shell
 python src/video_preprocessing/download_videos/youtube_download.py -n hitched -ch 30 -url https://www.youtube.com/watch\?v\=r11Lr4FILX8
+
+
+python scene_detect.py -base_path /Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/hitch_v4/video_chunks/
 ```
