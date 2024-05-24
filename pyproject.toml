@@ -29,7 +29,7 @@ tqdm = "^4.66.4"
 black = "^24.4.2"
 pre-commit = "^3.7.1"
 scenedetect = "^0.6.3"
-layoutparser = "^0.3.4"
+layoutparser = {extras = ["layoutmodels"], version = "^0.3.4"}
 datasets = "^2.19.1"
 pickle-secure = "^0.99.9"
 pytesseract = "^0.3.10"
