@@ -8,8 +8,6 @@ import moviepy.editor as mp
 from download_utils import extract_and_store_audio, split_video, transcribe_audio_files
 from yt_dlp import YoutubeDL
 
-import whisper
-
 
 def preprocess_video(
     download,
@@ -98,11 +96,7 @@ def preprocess_video(
 
     print("Transcriptions starts")
 
-    # Instantiate whisper model using model_type variable
-
-    model = whisper.load_model(model_type)
-
-    transcribe_audio_files(audio_chunks_dir, transcriptions_dir, model)
+    transcribe_audio_files(audio_chunks_dir, transcriptions_dir, model_type)
 
 
 def main():
