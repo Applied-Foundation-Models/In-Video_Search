@@ -2,3 +2,6 @@
 .idea/
 # Ignore macOS system files
 .DS_Store
+data/raw/
+# Ignore .pyc files
+*.pyc

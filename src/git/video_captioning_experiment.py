@@ -1,8 +1,7 @@
 import av
 import numpy as np
-from PIL import Image
 from huggingface_hub import hf_hub_download
-from transformers import AutoProcessor, AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, AutoProcessor
 
 processor = AutoProcessor.from_pretrained("microsoft/git-base-vatex")
 model = AutoModelForCausalLM.from_pretrained("microsoft/git-base-vatex")
@@ -12,14 +11,14 @@ np.random.seed(45)
 
 
 def read_video_pyav(container, indices):
-    '''
+    """
     Decode the video with PyAV decoder.
     Args:
         container (`av.container.input.InputContainer`): PyAV container.
         indices (`List[int]`): List of frame indices to decode.
     Returns:
         result (np.ndarray): np array of decoded frames of shape (num_frames, height, width, 3).
-    '''
+    """
     frames = []
     container.seek(0)
     start_index = indices[0]
@@ -33,7 +32,7 @@ def read_video_pyav(container, indices):
 
 
 def sample_frame_indices(clip_len, frame_sample_rate, seg_len):
-    '''
+    """
     Sample a given number of frame indices from the video.
     Args:
         clip_len (`int`): Total number of frames to sample.
@@ -41,7 +40,7 @@ def sample_frame_indices(clip_len, frame_sample_rate, seg_len):
         seg_len (`int`): Maximum allowed index of sample's last frame.
     Returns:
         indices (`List[int]`): List of sampled frame indices
-    '''
+    """
     converted_len = int(clip_len * frame_sample_rate)
     end_idx = np.random.randint(converted_len, seg_len)
     start_idx = end_idx - converted_len
@@ -67,4 +66,7 @@ pixel_values = processor(images=list(frames), return_tensors="pt").pixel_values
 
 generated_ids = model.generate(pixel_values=pixel_values, max_length=50)
 
-print("Generated caption:", processor.batch_decode(generated_ids, skip_special_tokens=True))
+print(
+    "Generated caption:",
+    processor.batch_decode(generated_ids, skip_special_tokens=True),
+)

@@ -199,13 +199,25 @@ def split_video(filename, split_length=None, manifest=None, output_dir=None, **k
         if not split_length:
             video_length = get_video_length(filename)
             split_by_seconds(
-                filename, split_length, video_length=video_length, **kwargs
+                filename, split_length, output_dir, video_length=video_length, **kwargs
             )
         else:
             split_by_seconds(filename, split_length, output_dir, **kwargs)
 
 
 def split_mp3(input_file, output_dir, split_length):
+    """
+    Split an MP3 file into multiple snippets of a specified length.
+
+    Args:
+        input_file (str): The path to the input MP3 file.
+        output_dir (str): The directory where the snippets will be saved.
+        split_length (int): The length of each snippet in seconds.
+
+    Returns:
+        None
+    """
+
     print(f"Output_dir_audio: {output_dir}")
     # os.chmod(output_dir, 0o777)
     # os.makedirs(output_dir, exist_ok=True)

@@ -1,6 +1,7 @@
 # Imports
 from __future__ import unicode_literals
 
+import argparse
 import os
 
 import moviepy.editor as mp
@@ -21,6 +22,7 @@ def preprocess_video(
     input_file,
     output,
     lang,
+    split_length=None,
     uploaded_vid=None,
 ):
     # ------------------------------------------------------------------------------------------------------------------------------
@@ -80,19 +82,20 @@ def preprocess_video(
         my_clip.write_videofile(f"{path_to_data}/{input_file}")
         # my_clip.audio.write_audiofile(f"{path_to_data}/{audio_file}")
 
-    print("Splitting starts:")
+    if split_length is not None:
+        print("Splitting starts:")
+        split_video(
+            filename=f"{path_to_data}/{input_file}",
+            split_length=split_length,
+            output_dir=video_chunks_dir,
+            vcodec="copy",
+            acodec="copy",
+        )
+        extract_and_store_audio(video_chunks_dir, audio_chunks_dir)
+    else:
+        print("Video is not splitted:")
+        extract_and_store_audio(path_to_data, audio_chunks_dir)
 
-    # Call the split function
-    split_length = 30
-
-    split_video(
-        filename=f"{path_to_data}/{input_file}",
-        split_length=split_length,
-        output_dir=video_chunks_dir,
-        vcodec="copy",
-        acodec="copy",
-    )
-    extract_and_store_audio(video_chunks_dir, audio_chunks_dir)
     print("Transcriptions starts")
 
     # Instantiate whisper model using model_type variable
@@ -103,19 +106,41 @@ def preprocess_video(
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Download and process a video from YouTube."
+    )
+    parser.add_argument(
+        "-n", "--name", type=str, required=True, help="Name of the video."
+    )
+    parser.add_argument(
+        "-url",
+        "--youtube_url",
+        type=str,
+        required=True,
+        help="YouTube URL of the video.",
+    )
+    parser.add_argument(
+        "-ch",
+        "--chunks",
+        type=int,
+        default=None,
+        help="Split size in seconds if not specified, will not be splitted",
+    )
+
+    args = parser.parse_args()
+
     opts_aud = {"format": "mp3/bestaudio/best", "keep-video": True}
     opts_vid = {"format": "mp4/bestvideo/best"}
 
-    # INSERT Youtube URL
-    URL = "https://www.youtube.com/watch?v=r11Lr4FILX8"
-
     # INSERT video name here
-    name = "hitched"
+    name = args.name
+    url = args.youtube_url
+    chunks = args.chunks
 
     preprocess_video(
         download=True,
         uploaded_vid="dune.mp4",  # path to local file
-        url=URL,
+        url=url,
         name=name,
         aud_opts=opts_aud,
         vid_opts=opts_vid,  # Video download settings
@@ -126,6 +151,7 @@ def main():
         input_file=name + ".mp4",
         output="output.mp4",
         lang="english",
+        split_length=chunks,
     )
 
 
