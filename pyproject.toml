@@ -34,6 +34,9 @@ datasets = "^2.19.1"
 pickle-secure = "^0.99.9"
 pytesseract = "^0.3.10"
 easyocr = "^1.7.1"
+multiprocess = "^0.70.16"
+soundfile = "^0.12.1"
+librosa = "^0.10.2.post1"
 
 [tool.poetry.extras]
 use_hdbscan = ["hdbscan"]

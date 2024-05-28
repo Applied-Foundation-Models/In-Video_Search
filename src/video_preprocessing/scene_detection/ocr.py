@@ -8,20 +8,19 @@ import easyocr
 import numpy as np
 import pytesseract
 from pytesseract import Output
-
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "-base_path",
-    "--base_path",
-    help="base folder path of dataset ",
-    default="/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/bio-4_l1_ch1/video_chunks/1_7/scenes",
-)
-args = parser.parse_args()
-
-BASE_PATH = args.base_path
+from tqdm import tqdm
 
 
 def get_OCR_pytesseract(img_path):
+    """
+    Extracts text from an image using Pytesseract OCR.
+
+    Args:
+        img_path (str): The path to the image file.
+
+    Returns:
+        dict: A dictionary containing the extracted text as keys and their corresponding bounding box coordinates as values.
+    """
     image = cv2.imread(img_path)
     results = pytesseract.image_to_data(image, output_type=Output.DICT)
     # get surrounding median color
@@ -53,6 +52,16 @@ def get_OCR_pytesseract(img_path):
 
 
 def get_ocr_easyocr(img_path):
+    """
+    Perform optical character recognition (OCR) on an image using EasyOCR.
+
+    Args:
+        img_path (str): The path to the image file.
+
+    Returns:
+        list: A list of OCR results. Each result is a tuple containing the recognized text and its bounding box coordinates.
+
+    """
     # specify once which language we need
     reader = easyocr.Reader(["en"])
 
@@ -61,21 +70,52 @@ def get_ocr_easyocr(img_path):
     return result
 
 
-for dirpath, subdirs, files in os.walk(BASE_PATH):
-    for file in files:
-        if file.endswith(".jpg"):
-            img_path = os.path.join(dirpath, file)
-            ocr_dict = get_OCR_pytesseract(img_path)
-            # ocr_result = get_ocr_easyocr(img_path)
+def extract_text_from_slide(dir_path, des):
+    """
+    Extracts text from slides in the given directory using OCR (Optical Character Recognition).
 
-            file = file.replace(".jpg", ".pickle")
-            dest_path = os.path.join(BASE_PATH, file)
-            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-            with open(dest_path, "wb") as file_:
-                pickle.dump(ocr_dict, file_, -1)
+    Args:
+        dir_path (str): The path to the directory containing the slide images.
+
+    Returns:
+        None
+
+    Raises:
+        None
+    """
+
+    for dirpath, subdirs, files in os.walk(dir_path):
+        for file in tqdm(files):
+            if file.endswith(".jpg"):
+                img_path = os.path.join(dirpath, file)
+                ocr_dict = get_OCR_pytesseract(img_path)
+                # Replace with alternative algorithm here
+                # ocr_result = get_ocr_easyocr(img_path)
+
+                file = file.replace(".jpg", ".pickle")
+                dest_path = os.path.join(dir_path, file)
+                os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                with open(dest_path, "wb") as file_:
+                    pickle.dump(ocr_dict, file_, -1)
 
 
 def load_pickle(pickle_path):
     with open(pickle_path, "rb") as file:
         ocr_dict = pickle.load(file)
         print(ocr_dict)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-base_path",
+        "--base_path",
+        help="base folder path of dataset ",
+        default="/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/bio-4_l1_ch1/video_chunks/1_7/scenes",
+    )
+    args = parser.parse_args()
+
+    dir_path = args.base_path
+
+    extract_text_from_slide(dir_path)
+    pickle_path = os.path.join(dir_path, "example.pickle")

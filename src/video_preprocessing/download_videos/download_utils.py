@@ -7,14 +7,12 @@ import math
 import os
 import shlex
 import subprocess
+from multiprocessing import Pool
 
 import pandas as pd
-import torch
-from datasets import load_dataset
 from moviepy.editor import VideoFileClip
 from pydub import AudioSegment
 from tqdm import tqdm
-from transformers import pipeline
 
 import whisper
 
@@ -286,70 +284,105 @@ def extract_and_store_audio(video_dir, audio_dir):
 
 
 # Speed up using hugging_face-whisper: https://www.reddit.com/r/MachineLearning/comments/14xxg6i/d_what_is_the_most_efficient_version_of_openai/
+# def transcribe_audio_files(
+#     audio_dir, transcriptions_dir, model_type="small", lang="en"
+# ):
+#     """
+#     Transcribe each audio file in the audio_dir and save transcriptions to transcriptions_dir.
+#     """
+#     model = whisper.load_model(model_type)
+#     os.makedirs(transcriptions_dir, exist_ok=True)
+#     audio_files = [f for f in os.listdir(audio_dir) if f.endswith(".wav")]
+
+#     for audio_file in tqdm(audio_files):
+#         audio_path = os.path.join(audio_dir, audio_file)
+#         result = model.transcribe(audio_path, task="translate", language=lang)
+#         # Create Subtitle dataframe and save it
+#         dict1 = {"start": [], "end": [], "text": []}
+#         for segment in result["segments"]:
+#             dict1["start"].append(int(segment["start"]))
+#             dict1["end"].append(int(segment["end"]))
+#             dict1["text"].append(segment["text"])
+#         df = pd.DataFrame.from_dict(dict1)
+#         df.to_csv(os.path.join(transcriptions_dir, audio_file.replace(".wav", ".csv")))
+#         print(f"Transcription for {audio_file} saved in {transcriptions_dir}")
+#         audio_path = os.path.join(audio_dir, audio_file)
+#         result = model.transcribe(audio_path, task="translate", language=lang)
+
+#         # Create Subtitle dataframe and save it
+#         dict1 = {"start": [], "end": [], "text": []}
+#         for segment in result["segments"]:
+#             dict1["start"].append(int(segment["start"]))
+#             dict1["end"].append(int(segment["end"]))
+#             dict1["text"].append(segment["text"])
+
+#         df = pd.DataFrame.from_dict(dict1)
+#         df.to_csv(os.path.join(transcriptions_dir, audio_file.replace(".wav", ".csv")))
+
+#         print(f"Transcription for {audio_file} saved in {transcriptions_dir}")
+
+
+def transcribe_single_file(args):
+    audio_dir, audio_file, transcriptions_dir, model_type, lang = args
+    model = whisper.load_model(model_type)
+    audio_path = os.path.join(audio_dir, audio_file)
+    result = model.transcribe(audio_path, task="translate", language=lang)
+
+    dict1 = {"start": [], "end": [], "text": []}
+    for segment in result["segments"]:
+        dict1["start"].append(int(segment["start"]))
+        dict1["end"].append(int(segment["end"]))
+        dict1["text"].append(segment["text"])
+
+    df = pd.DataFrame.from_dict(dict1)
+    df.to_csv(
+        os.path.join(transcriptions_dir, audio_file.replace(".wav", ".csv")),
+        index=False,
+    )
+    print(f"Transcription for {audio_file} saved in {transcriptions_dir}")
+
+
 def transcribe_audio_files(
     audio_dir, transcriptions_dir, model_type="small", lang="en"
 ):
-    """
-    Transcribe each audio file in the audio_dir and save transcriptions to transcriptions_dir.
-    """
-    model = whisper.load_model(model_type)
     os.makedirs(transcriptions_dir, exist_ok=True)
     audio_files = [f for f in os.listdir(audio_dir) if f.endswith(".wav")]
 
-    for audio_file in tqdm(audio_files):
-        audio_path = os.path.join(audio_dir, audio_file)
-        result = model.transcribe(audio_path, task="translate", language=lang)
-        # Create Subtitle dataframe and save it
-        dict1 = {"start": [], "end": [], "text": []}
-        for segment in result["segments"]:
-            dict1["start"].append(int(segment["start"]))
-            dict1["end"].append(int(segment["end"]))
-            dict1["text"].append(segment["text"])
-        df = pd.DataFrame.from_dict(dict1)
-        df.to_csv(os.path.join(transcriptions_dir, audio_file.replace(".wav", ".csv")))
-        print(f"Transcription for {audio_file} saved in {transcriptions_dir}")
-        audio_path = os.path.join(audio_dir, audio_file)
-        result = model.transcribe(audio_path, task="translate", language=lang)
+    # Tuple of arguments for each file
+    tasks = [
+        (audio_dir, audio_file, transcriptions_dir, model_type, lang)
+        for audio_file in audio_files
+    ]
 
-        # Create Subtitle dataframe and save it
-        dict1 = {"start": [], "end": [], "text": []}
-        for segment in result["segments"]:
-            dict1["start"].append(int(segment["start"]))
-            dict1["end"].append(int(segment["end"]))
-            dict1["text"].append(segment["text"])
-
-        df = pd.DataFrame.from_dict(dict1)
-        df.to_csv(os.path.join(transcriptions_dir, audio_file.replace(".wav", ".csv")))
-
-        print(f"Transcription for {audio_file} saved in {transcriptions_dir}")
+    # Create a pool of processes and map the tasks
+    print("Starting pooling:")
+    with Pool(processes=os.cpu_count()) as pool:
+        list(tqdm(pool.imap(transcribe_single_file, tasks), total=len(tasks)))
 
 
-def hugging_face_whisper():
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
-    pipe = pipeline(
-        "automatic-speech-recognition",
-        model="openai/whisper-large-v2",
-        chunk_length_s=30,
-        device=device,
-    )
-    ds = load_dataset(
-        "hf-internal-testing/librispeech_asr_dummy", "clean", split="validation"
-    )
-    sample = ds[0]["audio"]
+# def hugging_face_whisper():
+#     # device = "mps" if torch.backends.mps.is_available() else "cpu"
+#     device = "cpu"
+#     pipe = pipeline(
+#         "automatic-speech-recognition",
+#         model="openai/whisper-tiny",
+#         chunk_length_s=30,
+#         device=device,
+#     )
+#     ds = load_dataset(
+#         "hf-internal-testing/librispeech_asr_dummy", "clean", split="validation"
+#     )
+#     sample = ds[0]["audio"]
+#     print(f"Sample:{sample}")
+#     filepath = "/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/biology_chapter_3_3/audio_chunks/biology_chapter_3_3-Scene-001.wav"
+#     audio_data, sample_rate = sf.read(filepath)
 
-    prediction = pipe(sample.copy(), batch_size=8, return_timestamps=True)["chunks"]
-    print(prediction)
+#     # Prepare the audio dictionary expected by the Whisper pipeline
+#     sample = {"array": audio_data, "sampling_rate": sample_rate}
+#     print(f"WAV sample: {sample}")
 
-    # pipe = pipeline(model="facebook/wav2vec2-base-960h")
-    # # stride_length_s is a tuple of the left and right stride length.
-    # # With only 1 number, both sides get the same stride, by default
-    # # the stride_length on one side is 1/6th of the chunk_length_s
-    # output = pipe(
-    #     "/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/bio-4_l1_ch1/audio_chunks/bio-4_l1_ch1-1-of-7.wav",
-    #     chunk_length_s=10,
-    #     stride_length_s=(4, 2),
-    # )
-    # print(output)
+#     prediction = pipe(sample.copy(), batch_size=8, return_timestamps=True)["chunks"]
+#     print(prediction)
 
 
 if __name__ == "__main__":
@@ -381,7 +414,7 @@ if __name__ == "__main__":
         help="Language for transcription",
     )
     parser.add_argument(
-        "--run_whisper",
+        "--run_hugging_face",
         action="store_true",
         help="Run the Hugging Face Whisper function",
     )
@@ -392,5 +425,5 @@ if __name__ == "__main__":
             args.audio_dir, args.transcriptions_dir, args.model, args.lang
         )
 
-    if args.run_whisper:
-        hugging_face_whisper()
+    # if args.run_hugging_face:
+    #     hugging_face_whisper()

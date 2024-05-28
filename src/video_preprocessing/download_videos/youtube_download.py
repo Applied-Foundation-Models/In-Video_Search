@@ -5,8 +5,9 @@ import argparse
 import os
 
 import moviepy.editor as mp
-from download_utils import extract_and_store_audio, split_video, transcribe_audio_files
 from yt_dlp import YoutubeDL
+
+from src.video_preprocessing.download_videos.download_utils import split_video
 
 
 def preprocess_video(
@@ -14,38 +15,32 @@ def preprocess_video(
     url,
     aud_opts,
     vid_opts,
-    model_type,
     name,
     audio_file,
     input_file,
     output,
-    lang,
     split_length=None,
     uploaded_vid=None,
 ):
-    # ------------------------------------------------------------------------------------------------------------------------------
-    #     Params:
-    # ------------------------------------------------------------------------------------------------------------------------------
-    #     download:      bool, this tells your function if you are downloading a youtube video
-    #     url: str,      str, the URL of youtube video to download if download is True
-    #     aud_opts:      dict, audio file youtube-dl options
-    #     vid_opts:      dict, video file youtube-dl options
-    #     model_type:    str, which pretrained model to download. Options are:
-    #                    ['tiny', 'small', 'base', 'medium','large','tiny.en', 'small.en', 'base.en', 'medium.en']
-    #                    More details about model_types can be found in table in original repo here:
-    #                    https://github.com/openai/whisper#Available-models-and-languages
-    # .    name:          str, name of directory to store files in in experiments_download folder
-    #     audio_file:    str, path to extracted audio file for Whisper
-    #     input_file:    str, path to video file for MoviePy to caption
-    #     output:        str, destination of final output video file
-    #     uploaded_vid:  str, path to uploaded video file if download is False
-    #
-    # --------------------------------------------------------------------------------------------------------------------------------
-    #     Returns:       An annotated video with translated captions into english, saved to name/output
-    # --------------------------------------------------------------------------------------------------------------------------------
+    """
+    Preprocesses a video by downloading it from YouTube or using a local clip,
+    splitting it into chunks if specified, and storing the results in the appropriate directories.
 
-    # First, this checks if your expermiment name is taken. If not, it will create the directory.
-    # Otherwise, we will be prompted to retry with a new name
+    Args:
+        download (bool): Whether to download the video from YouTube or use a local clip.
+        url (str): The URL of the YouTube video to download.
+        aud_opts (dict): Options for downloading the audio using youtube-dl.
+        vid_opts (dict): Options for downloading the video using youtube-dl.
+        name (str): The name of the video.
+        audio_file (str): The filename of the downloaded audio file.
+        input_file (str): The filename of the downloaded video file.
+        output (str): The output directory for storing the results.
+        split_length (int, optional): The length (in seconds) to split the video into chunks. Defaults to None.
+        uploaded_vid (str, optional): The path to the local video clip to use if not downloading from YouTube. Defaults to None.
+
+    Returns:
+        str: The path to the directory where the video and audio chunks, as well as transcriptions, are stored.
+    """
     basepath = os.getcwd()
     path_to_data = os.path.join(basepath, "data/raw", name)
     try:
@@ -89,14 +84,15 @@ def preprocess_video(
             vcodec="copy",
             acodec="copy",
         )
-        extract_and_store_audio(video_chunks_dir, audio_chunks_dir)
+        # extract_and_store_audio(video_chunks_dir, audio_chunks_dir)
     else:
         print("Video is not splitted:")
-        extract_and_store_audio(path_to_data, audio_chunks_dir)
 
-    print("Transcriptions starts")
+        # extract_and_store_audio(path_to_data, audio_chunks_dir)
 
-    transcribe_audio_files(audio_chunks_dir, transcriptions_dir, model_type)
+    print("Video downloaded successfully!")
+
+    return path_to_data
 
 
 def main():
@@ -131,20 +127,16 @@ def main():
     url = args.youtube_url
     chunks = args.chunks
 
-    preprocess_video(
+    _ = preprocess_video(
         download=True,
         uploaded_vid="dune.mp4",  # path to local file
         url=url,
         name=name,
         aud_opts=opts_aud,
         vid_opts=opts_vid,  # Video download settings
-        model_type="small",  # change to 'large' if you want more accurate results,
-        # change to 'medium.en' or 'large.en' for all english language tasks,
-        # and change to 'small' or 'base' for faster inference
         audio_file=name + ".mp3",
         input_file=name + ".mp4",
         output="output.mp4",
-        lang="english",
         split_length=chunks,
     )
 
