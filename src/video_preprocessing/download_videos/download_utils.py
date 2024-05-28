@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import argparse
 import csv
 import json
 import math
@@ -8,9 +9,14 @@ import shlex
 import subprocess
 
 import pandas as pd
+import torch
+from datasets import load_dataset
 from moviepy.editor import VideoFileClip
 from pydub import AudioSegment
 from tqdm import tqdm
+from transformers import pipeline
+
+import whisper
 
 # The rest of the functions remain unchanged
 
@@ -279,10 +285,14 @@ def extract_and_store_audio(video_dir, audio_dir):
         print(f"Audio extracted and saved as {audio_path}")
 
 
-def transcribe_audio_files(audio_dir, transcriptions_dir, model, lang="en"):
+# Speed up using hugging_face-whisper: https://www.reddit.com/r/MachineLearning/comments/14xxg6i/d_what_is_the_most_efficient_version_of_openai/
+def transcribe_audio_files(
+    audio_dir, transcriptions_dir, model_type="small", lang="en"
+):
     """
     Transcribe each audio file in the audio_dir and save transcriptions to transcriptions_dir.
     """
+    model = whisper.load_model(model_type)
     os.makedirs(transcriptions_dir, exist_ok=True)
     audio_files = [f for f in os.listdir(audio_dir) if f.endswith(".wav")]
 
@@ -312,3 +322,75 @@ def transcribe_audio_files(audio_dir, transcriptions_dir, model, lang="en"):
         df.to_csv(os.path.join(transcriptions_dir, audio_file.replace(".wav", ".csv")))
 
         print(f"Transcription for {audio_file} saved in {transcriptions_dir}")
+
+
+def hugging_face_whisper():
+    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    pipe = pipeline(
+        "automatic-speech-recognition",
+        model="openai/whisper-large-v2",
+        chunk_length_s=30,
+        device=device,
+    )
+    ds = load_dataset(
+        "hf-internal-testing/librispeech_asr_dummy", "clean", split="validation"
+    )
+    sample = ds[0]["audio"]
+
+    prediction = pipe(sample.copy(), batch_size=8, return_timestamps=True)["chunks"]
+    print(prediction)
+
+    # pipe = pipeline(model="facebook/wav2vec2-base-960h")
+    # # stride_length_s is a tuple of the left and right stride length.
+    # # With only 1 number, both sides get the same stride, by default
+    # # the stride_length on one side is 1/6th of the chunk_length_s
+    # output = pipe(
+    #     "/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/bio-4_l1_ch1/audio_chunks/bio-4_l1_ch1-1-of-7.wav",
+    #     chunk_length_s=10,
+    #     stride_length_s=(4, 2),
+    # )
+    # print(output)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run components of the download utils")
+    parser.add_argument(
+        "--transcribe_audio",
+        action="store_true",
+        help="Transcribe audio files",
+    )
+    parser.add_argument(
+        "--audio_dir",
+        type=str,
+        help="Directory containing audio files",
+    )
+    parser.add_argument(
+        "--transcriptions_dir",
+        type=str,
+        help="Directory to save transcriptions",
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Model for transcription",
+    )
+    parser.add_argument(
+        "--lang",
+        type=str,
+        default="en",
+        help="Language for transcription",
+    )
+    parser.add_argument(
+        "--run_whisper",
+        action="store_true",
+        help="Run the Hugging Face Whisper function",
+    )
+    args = parser.parse_args()
+
+    if args.transcribe_audio:
+        transcribe_audio_files(
+            args.audio_dir, args.transcriptions_dir, args.model, args.lang
+        )
+
+    if args.run_whisper:
+        hugging_face_whisper()
