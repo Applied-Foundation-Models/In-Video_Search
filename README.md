@@ -70,3 +70,23 @@ python src/video_preprocessing/download_videos/youtube_download.py -n hitched -c
 
 python scene_detect.py -base_path /Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/hitch_v4/video_chunks/
 ```
+## Video Preprocessing: Pixel Difference Method
+
+```shell
+python keyframe_extraction_pixel_difference.py --video_path [path_to_video] --threshold [sensitivity]
+
+```
+Parameters
+- --video_path (required): Path to the video file.
+- --threshold (optional): Sensitivity threshold for detecting changes between frames. The default is 0.2.
+
+## Video Preprocessing: Fixed Time Interval Extraction Method
+
+```shell
+python frame_extractor.py --video_path [path_to_your_video] --timestamp [start_time_in_seconds] --interval [time_interval_in_seconds]
+```
+
+Parameters
+- --video_path (required): Path to the video file.
+- --timestamp (optional): Start time in seconds for extracting frames. The default is 0 seconds.
+- --interval (optional): Time interval in seconds for extracting frames. The default is 1 second.
