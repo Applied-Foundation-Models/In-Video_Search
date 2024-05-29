@@ -19,10 +19,27 @@ ffmpeg = "^1.4"
 scikit-image = "^0.23.2"
 scikit-learn = "^1.4.2"
 hdbscan = { version = "^0.8.33", optional = true }
+yt-dlp = "^2024.4.9"
+openai-whisper = {git = "https://github.com/openai/whisper.git"}
+moviepy = "^1.0.3"
+pandas = "^2.2.2"
+optparse-pretty = "^0.1.1"
+pydub = "^0.25.1"
+tqdm = "^4.66.4"
+black = "^24.4.2"
+pre-commit = "^3.7.1"
+scenedetect = "^0.6.3"
+layoutparser = {extras = ["layoutmodels"], version = "^0.3.4"}
+datasets = "^2.19.1"
+pickle-secure = "^0.99.9"
+pytesseract = "^0.3.10"
+easyocr = "^1.7.1"
+multiprocess = "^0.70.16"
+soundfile = "^0.12.1"
+librosa = "^0.10.2.post1"
 
 [tool.poetry.extras]
 use_hdbscan = ["hdbscan"]
-
 
 [build-system]
 requires = ["poetry-core"]

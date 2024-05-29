@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import ffmpeg
 
 
 def extract_keyframes(video_path, threshold=0.2):
@@ -29,13 +28,16 @@ def extract_keyframes(video_path, threshold=0.2):
         gray_prev = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        # Compute the absolute difference between current frame and previous frame
+        # Compute the absolute difference between current frame and previous
+        # frame
         diff = cv2.absdiff(gray_frame, gray_prev)
-        non_zero_count = np.sum(diff > 50) / diff.size  # Normalize to [0,1] range
+        # Normalize to [0,1] range
+        non_zero_count = np.sum(diff > 50) / diff.size
 
-        # If change between frames is greater than threshold, save the frame as a keyframe
+        # If change between frames is greater than threshold, save the frame as
+        # a keyframe
         if non_zero_count > threshold:
-            keyframe_path = f'keyframe_{keyframe_idx}.jpg'
+            keyframe_path = f"keyframe_{keyframe_idx}.jpg"
             cv2.imwrite(keyframe_path, frame)
             print(f"Keyframe saved at {keyframe_path}")
             keyframe_idx += 1
@@ -49,5 +51,5 @@ def extract_keyframes(video_path, threshold=0.2):
 
 
 # Example usage
-video_path = 'mathe_1.mp4'
+video_path = "mathe_1.mp4"
 extract_keyframes(video_path, threshold=0.1)

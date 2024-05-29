@@ -1,18 +1,15 @@
-import cv2
 import os
-import operator
+
+import cv2
 import numpy as np
 from scipy.signal import argrelextrema
 
-import tempfile
-
-
 # import Katna.config as config
+
 
 # Class to hold information about each frame
 class Frame:
-    """Class for storing frame ref
-    """
+    """Class for storing frame ref"""
 
     def __init__(self, frame, sum_abs_diff):
         self.frame = frame
@@ -26,7 +23,9 @@ class Configs:
     len_window = 10
     # Chunk size of Images to be processed at a time in memory
     max_frames_in_chunk = 2500
-    # Type of smoothening window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman' flat window will produce a moving average smoothing.
+    # Type of smoothening window from 'flat', 'hanning', 'hamming',
+    # 'bartlett', 'blackman' flat window will produce a moving average
+    # smoothing.
     window_type = "hanning"
     # Setting for optimum Brightness values
     # min_brightness_value = 1.0
@@ -37,8 +36,7 @@ class Configs:
 
 
 class FrameExtractor(object):
-    """Class for extraction of key frames from video : based on sum of absolute differences in LUV colorspace from given video
-    """
+    """Class for extraction of key frames from video : based on sum of absolute differences in LUV colorspace from given video"""
 
     def __init__(self):
         # self.FrameExtractor()
@@ -125,7 +123,9 @@ class FrameExtractor(object):
                 if ret:
                     # Calling process frame function to calculate the frame difference and adding the difference
                     # in **frame_diffs** list and frame to **frames** list
-                    prev_frame, curr_frame = self.__process_frame(frame, prev_frame, frame_diffs, frames)
+                    prev_frame, curr_frame = self.__process_frame(
+                        frame, prev_frame, frame_diffs, frames
+                    )
                     i = i + 1
                     ret, frame = cap.read()
                     # print(frame_count)
@@ -138,7 +138,7 @@ class FrameExtractor(object):
         cap.release()
 
     def __get_frames_in_local_maxima__(self, frames, frame_diffs):
-        """ Internal function for getting local maxima of key frames
+        """Internal function for getting local maxima of key frames
         This functions Returns one single image with strongest change from its vicinity of frames
         ( vicinity defined using window length )
         :param object: base class inheritance
@@ -190,19 +190,28 @@ class FrameExtractor(object):
             raise (ValueError, "smooth only accepts 1 dimension arrays.")
 
         if x.size < window_len:
-            raise (ValueError, "Input vector needs to be bigger than window size.")
+            raise (
+                ValueError,
+                "Input vector needs to be bigger than window size.",
+            )
 
         if window_len < 3:
             return x
 
-        if not window in ["flat", "hanning", "hamming", "bartlett", "blackman"]:
-            raise (
-                ValueError,
-                "Smoothing Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'",
+        if window not in [
+            "flat",
+            "hanning",
+            "hamming",
+            "bartlett",
+            "blackman",
+        ]:
+            raise ValueError(
+                "Smoothing Window is one of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
             )
 
         # Doing row-wise merging of frame differences wrt window length. frame difference
-        # by factor of two and subtracting the frame differences from index == window length in reverse direction
+        # by factor of two and subtracting the frame differences from index ==
+        # window length in reverse direction
         s = np.r_[2 * x[0] - x[window_len:1:-1], x, 2 * x[-1] - x[-1:-window_len:-1]]
 
         if window == "flat":  # moving average
@@ -210,10 +219,10 @@ class FrameExtractor(object):
         else:
             w = getattr(np, window)(window_len)
         y = np.convolve(w / w.sum(), s, mode="same")
-        return y[window_len - 1: -window_len + 1]
+        return y[window_len - 1 : -window_len + 1]
 
     def extract_candidate_frames(self, videopath):
-        """ Pubic function for this module , Given and input video path
+        """Pubic function for this module , Given and input video path
         This functions Returns one list of all candidate key-frames
         :param object: base class inheritance
         :type object: class:`Object`
@@ -236,8 +245,8 @@ class FrameExtractor(object):
             extracted_candidate_key_frames_chunk = []
             if self.USE_LOCAL_MAXIMA:
                 # Getting the frame with maximum frame difference
-                extracted_candidate_key_frames_chunk = self.__get_frames_in_local_maxima__(
-                    frames, frame_diffs
+                extracted_candidate_key_frames_chunk = (
+                    self.__get_frames_in_local_maxima__(frames, frame_diffs)
                 )
                 extracted_candidate_key_frames.extend(
                     extracted_candidate_key_frames_chunk
