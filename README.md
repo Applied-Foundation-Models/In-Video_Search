@@ -77,8 +77,8 @@ python keyframe_extraction_pixel_difference.py --video_path [path_to_video] --th
 
 ```
 Parameters
---video_path (required): Path to the video file.
---threshold (optional): Sensitivity threshold for detecting changes between frames. The default is 0.2.
+- --video_path (required): Path to the video file.
+- --threshold (optional): Sensitivity threshold for detecting changes between frames. The default is 0.2.
 
 ## Video Preprocessing: Fixed Time Interval Extraction Method
 
@@ -87,6 +87,6 @@ python frame_extractor.py --video_path [path_to_your_video] --timestamp [start_t
 ```
 
 Parameters
---video_path (required): Path to the video file.
---timestamp (optional): Start time in seconds for extracting frames. The default is 0 seconds.
---interval (optional): Time interval in seconds for extracting frames. The default is 1 second.
+- --video_path (required): Path to the video file.
+- --timestamp (optional): Start time in seconds for extracting frames. The default is 0 seconds.
+- --interval (optional): Time interval in seconds for extracting frames. The default is 1 second.
