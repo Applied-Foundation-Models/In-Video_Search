@@ -51,15 +51,13 @@ poetry install                              // only for the first execution
 streamlit run src/scripts/app/Startseite.py
 ```
 
+
 ## Downloading Videos from YouTube
 
-This pipeline downloads a video from YouTube, segments it into specified chunks, and generates transcriptions for each
-segment. The results are saved in the data folder. Below are the available command line arguments and their
-explanations:
+This pipeline downloads a video from YouTube, segments it into specified chunks, and generates transcriptions for each segment. The results are saved in the data folder. Below are the available command line arguments and their explanations:
 
 - **`-n`** or **`--name`**: Specifies the name of the output files.
-- **`-ch`** or **`--chunk`**: Defines the length of each video chunk in seconds. If this is not defined, the video will
-  not be split.
+- **`-ch`** or **`--chunk`**: Defines the length of each video chunk in seconds. If this is not defined, the video will not be split.
 - **`-url`**: The URL of the YouTube video to download.
 
 ### Example Command
@@ -72,17 +70,15 @@ python src/video_preprocessing/download_videos/youtube_download.py -n hitched -c
 
 python scene_detect.py -base_path /Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/hitch_v4/video_chunks/
 ```
-
 ## Video Preprocessing: Pixel Difference Method
 
 ```shell
 python keyframe_extraction_pixel_difference.py --video_path [path_to_video] --threshold [sensitivity]
 
 ```
-
 Parameters
---video_path (required): Path to the video file.
---threshold (optional): Sensitivity threshold for detecting changes between frames. The default is 0.2.
+- --video_path (required): Path to the video file.
+- --threshold (optional): Sensitivity threshold for detecting changes between frames. The default is 0.2.
 
 ## Video Preprocessing: Fixed Time Interval Extraction Method
 
@@ -91,9 +87,9 @@ python frame_extractor.py --video_path [path_to_your_video] --timestamp [start_t
 ```
 
 Parameters
---video_path (required): Path to the video file.
---timestamp (optional): Start time in seconds for extracting frames. The default is 0 seconds.
---interval (optional): Time interval in seconds for extracting frames. The default is 1 second.
+- --video_path (required): Path to the video file.
+- --timestamp (optional): Start time in seconds for extracting frames. The default is 0 seconds.
+- --interval (optional): Time interval in seconds for extracting frames. The default is 1 second.
 
 ## LLM Model: BART
 
