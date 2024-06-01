@@ -90,3 +90,17 @@ Parameters
 - --video_path (required): Path to the video file.
 - --timestamp (optional): Start time in seconds for extracting frames. The default is 0 seconds.
 - --interval (optional): Time interval in seconds for extracting frames. The default is 1 second.
+
+## LLM Model: BART
+
+```shell
+python bart_summarizer.py "Another long text for summarization."
+```
+
+## LLM Model: Bert
+
+```shell
+python bert_summarizer.py "Your long text goes here."
+```
+
+
