@@ -3253,6 +3253,20 @@ files = [
 ]
 
 [[package]]
+name = "ollama"
+version = "0.2.0"
+description = "The official Python client for Ollama."
+optional = false
+python-versions = "<4.0,>=3.8"
+files = [
+    {file = "ollama-0.2.0-py3-none-any.whl", hash = "sha256:fefe119386c8b2cb6b6e232f9c10894326675425be980403c6a7a2dbfc8b0e19"},
+    {file = "ollama-0.2.0.tar.gz", hash = "sha256:de056cada2a92433195102da2b8ff50f66335b138eff5d277765c8adf79983f0"},
+]
+
+[package.dependencies]
+httpx = ">=0.27.0,<0.28.0"
+
+[[package]]
 name = "omegaconf"
 version = "2.3.0"
 description = "A flexible configuration library"
@@ -6241,4 +6255,4 @@ use-hdbscan = ["hdbscan"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "22480f6760555cdd8740bd6f877a1e2b09a8b231946acd5cdb85e0d0178e77ae"
+content-hash = "045666082b1cb5e508505effdee47864aa12a61abb5e843be3eb852784c9bc29"
