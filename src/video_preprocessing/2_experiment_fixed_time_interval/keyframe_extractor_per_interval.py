@@ -1,13 +1,30 @@
-import os
-import cv2
 import argparse
+import os
+
+import cv2
+
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Extract frames from a video file at specified intervals.")
-    parser.add_argument("--video_path", type=str, required=True, help="Path to the video file.")
-    parser.add_argument("--timestamp", type=int, default=10, help="Timestamp in seconds where the keyframe should be extracted. Default is 10 seconds.")
-    parser.add_argument("--interval", type=int, default=10, help="Interval in seconds between frames to extract. Default is 10 seconds.")
+    parser = argparse.ArgumentParser(
+        description="Extract frames from a video file at specified intervals."
+    )
+    parser.add_argument(
+        "--video_path", type=str, required=True, help="Path to the video file."
+    )
+    parser.add_argument(
+        "--timestamp",
+        type=int,
+        default=10,
+        help="Timestamp in seconds where the keyframe should be extracted. Default is 10 seconds.",
+    )
+    parser.add_argument(
+        "--interval",
+        type=int,
+        default=10,
+        help="Interval in seconds between frames to extract. Default is 10 seconds.",
+    )
     return parser.parse_args()
+
 
 def main():
     args = parse_args()
@@ -29,7 +46,9 @@ def main():
 
     # Loop through the video at the specified interval
     for timestamp in range(args.timestamp, video_length, args.interval):
-        cap.set(cv2.CAP_PROP_POS_MSEC, timestamp*1000)  # Set the position in milliseconds
+        cap.set(
+            cv2.CAP_PROP_POS_MSEC, timestamp * 1000
+        )  # Set the position in milliseconds
         ret, frame = cap.read()
         if ret:
             # Save the frame as an image file
@@ -43,6 +62,7 @@ def main():
 
     # Closes all the frames
     cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     main()

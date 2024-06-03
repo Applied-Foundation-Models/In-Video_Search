@@ -102,5 +102,3 @@ python bart_summarizer.py "Another long text for summarization."
 ```shell
 python bert_summarizer.py "Your long text goes here."
 ```
-
-

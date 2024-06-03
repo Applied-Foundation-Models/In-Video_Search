@@ -1,5 +1,6 @@
-from PIL import Image
 import requests
+from PIL import Image
+
 
 def load_images_from_data(image_urls):
     images = []

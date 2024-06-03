@@ -1,6 +1,8 @@
+import argparse
+
 import cv2
 import numpy as np
-import argparse
+
 
 def extract_keyframes(video_path, threshold):
     # Open the video file
@@ -47,14 +49,25 @@ def extract_keyframes(video_path, threshold):
     cap.release()
     print("Done extracting keyframes")
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Extract keyframes from video based on frame differences.")
-    parser.add_argument("--video_path", type=str, required=True, help="Path to the video file.")
-    parser.add_argument("--threshold", type=float, default=0.2, help="Threshold for detecting keyframe (default: 0.2).")
+    parser = argparse.ArgumentParser(
+        description="Extract keyframes from video based on frame differences."
+    )
+    parser.add_argument(
+        "--video_path", type=str, required=True, help="Path to the video file."
+    )
+    parser.add_argument(
+        "--threshold",
+        type=float,
+        default=0.2,
+        help="Threshold for detecting keyframe (default: 0.2).",
+    )
 
     args = parser.parse_args()
 
     extract_keyframes(args.video_path, args.threshold)
+
 
 if __name__ == "__main__":
     main()

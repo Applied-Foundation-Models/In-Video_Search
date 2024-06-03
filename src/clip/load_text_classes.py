@@ -1,1 +1,1 @@
-text_classes = ['giraffe', 'zebra', 'elephant', 'teddybear', 'hotdog']
+text_classes = ["giraffe", "zebra", "elephant", "teddybear", "hotdog"]

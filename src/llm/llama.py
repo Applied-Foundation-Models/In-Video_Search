@@ -1,17 +1,13 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import transformers
 import torch
-
+import transformers
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 access_token = ""
 model = "meta-llama/Llama-2-7b-chat-hf"
 
 tokenizer = AutoTokenizer.from_pretrained(model, token=access_token)
 
-model = AutoModelForCausalLM.from_pretrained(
-    model, 
-    token=access_token
-)
+model = AutoModelForCausalLM.from_pretrained(model, token=access_token)
 
 pipeline = transformers.pipeline(
     "text-generation",
