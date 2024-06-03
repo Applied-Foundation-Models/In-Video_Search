@@ -3,7 +3,7 @@ import transformers
 import torch
 
 
-access_token = "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"
+access_token = ""
 model = "meta-llama/Llama-2-7b-chat-hf"
 
 tokenizer = AutoTokenizer.from_pretrained(model, token=access_token)
