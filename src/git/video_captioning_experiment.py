@@ -1,6 +1,7 @@
 import av
 import numpy as np
 from huggingface_hub import hf_hub_download
+from loguru import logger
 from transformers import AutoModelForCausalLM, AutoProcessor
 
 processor = AutoProcessor.from_pretrained("microsoft/git-base-vatex")
@@ -66,7 +67,7 @@ pixel_values = processor(images=list(frames), return_tensors="pt").pixel_values
 
 generated_ids = model.generate(pixel_values=pixel_values, max_length=50)
 
-print(
+logger.info(
     "Generated caption:",
     processor.batch_decode(generated_ids, skip_special_tokens=True),
 )

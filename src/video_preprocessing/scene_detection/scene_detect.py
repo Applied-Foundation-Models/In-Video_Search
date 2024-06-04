@@ -1,7 +1,7 @@
 import argparse
 import os
 from subprocess import call
-
+from loguru import logger
 # pip install --upgrade scenedetect[opencv]
 # https://pyscenedetect.readthedocs.io/en/latest/download/
 
@@ -24,13 +24,13 @@ def detect_scenes(file_path):
     for dirpath, subdirs, files in os.walk(file_path):
         for file in files:
             if file.endswith(".mp4"):
-                print("Found file")
+                logger.info("Found file")
                 name = file
                 video_path = os.path.join(file_path, file)
 
-                print(f"Name:{name},dirname:{video_path}")
+                logger.info(f"Name:{name},dirname:{video_path}")
                 try:
-                    print("Running scene_detection:")
+                    logger.info("Running scene_detection:")
                     run_scene = "scenedetect -i {video_path} -o {scenes}  -s {video_path_wo_suffix}.stats.csv list-scenes detect-content -t {treshhold} save-images -n {image_number} split-video -o {video_output_dir}".format(
                         video_path=video_path,
                         scenes=os.path.join(file_path, "extracted_keyframes"),
@@ -42,7 +42,7 @@ def detect_scenes(file_path):
                     call(run_scene, shell=True)
 
                 except Exception as e:
-                    print(e)
+                    logger.exception(e)
 
 
 if __name__ == "__main__":

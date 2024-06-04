@@ -2,9 +2,10 @@ import os
 
 import pytesseract
 from PIL import Image
+from loguru import logger
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-print(dir_path)
+logger.info(dir_path)
 
 
 def extract_text_from_image(image_path):
@@ -13,6 +14,6 @@ def extract_text_from_image(image_path):
     return text
 
 
-print(
+logger.info(
     extract_text_from_image("/Users/haseeb/Desktop/Praktikum/afm-vlm/src/ocr/test.png")
 )

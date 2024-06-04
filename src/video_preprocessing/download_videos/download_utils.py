@@ -8,6 +8,7 @@ import os
 import shlex
 import subprocess
 from multiprocessing import Pool
+from loguru import logger
 
 import pandas as pd
 from moviepy.editor import VideoFileClip
@@ -42,7 +43,7 @@ def split_by_manifest(
         extra (str)         - Extra options for ffmpeg.
     """
     if not os.path.exists(manifest):
-        print("File does not exist: %s" % manifest)
+        logger.error("File does not exist: %s" % manifest)
         raise SystemExit
 
     with open(manifest) as manifest_file:
@@ -52,7 +53,7 @@ def split_by_manifest(
         elif manifest_type == "csv":
             config = csv.DictReader(manifest_file)
         else:
-            print("Format not supported. File must be a csv or json file")
+            logger.error("Format not supported. File must be a csv or json file")
             raise SystemExit
 
         split_cmd = [
@@ -87,20 +88,19 @@ def split_by_manifest(
                     str(split_length),
                     filebase + "." + fileext,
                 ]
-                print("########################################################")
-                print("About to run: " + " ".join(split_cmd + split_args))
-                print("########################################################")
+                logger.info("########################################################")
+                logger.info("About to run: " + " ".join(split_cmd + split_args))
+                logger.info("########################################################")
                 subprocess.check_output(split_cmd + split_args)
             except KeyError as e:
-                print("############# Incorrect format ##############")
+                logger.error("############# Incorrect format ##############")
                 if manifest_type == "json":
-                    print("The format of each json array should be:")
-                    print("{start_time: <int>, length: <int>, rename_to: <string>}")
+                    logger.error("The format of each json array should be:")
+                    logger.error("{start_time: <int>, length: <int>, rename_to: <string>}")
                 elif manifest_type == "csv":
-                    print("start_time,length,rename_to should be the first line ")
-                    print("in the csv file.")
-                print("#############################################")
-                print(e)
+                    logger.error("start_time,length,rename_to should be the first line ")
+                    logger.error("in the csv file.")
+                logger.error(e)
                 raise SystemExit
 
 
@@ -118,7 +118,7 @@ def get_video_length(filename):
         )
     ).strip()
     video_length = int(float(output))
-    print("Video length in seconds: " + str(video_length))
+    logger.info("Video length in seconds: " + str(video_length))
 
     return video_length
 
@@ -138,14 +138,14 @@ def split_by_seconds(
     **kwargs,
 ):
     if split_length and split_length <= 0:
-        print("Split length can't be 0")
+        logger.info("Split length can't be 0")
         raise SystemExit
 
     if not video_length:
         video_length = get_video_length(filename)
     split_count = ceildiv(video_length, split_length)
     if split_count == 1:
-        print("Video length is less then the target split length.")
+        logger.info("Video length is less then the target split length.")
         raise SystemExit
 
     split_cmd = [
@@ -183,7 +183,7 @@ def split_by_seconds(
             str(split_length),
             output_filepath,
         ]
-        print("About to run: " + " ".join(split_cmd + split_args))
+        logger.info("About to run: " + " ".join(split_cmd + split_args))
         subprocess.check_output(split_cmd + split_args)
 
 
@@ -222,7 +222,7 @@ def split_mp3(input_file, output_dir, split_length):
         None
     """
 
-    print(f"Output_dir_audio: {output_dir}")
+    logger.info(f"Output_dir_audio: {output_dir}")
     # os.chmod(output_dir, 0o777)
     # os.makedirs(output_dir, exist_ok=True)
 
@@ -236,10 +236,10 @@ def split_mp3(input_file, output_dir, split_length):
     start_time = 0
     end_time = snippet_length_ms
 
-    print(f"Audio length: {len(audio)}")
-    print(f"Audio duration: {audio.duration_seconds}")
+    logger.info(f"Audio length: {len(audio)}")
+    logger.info(f"Audio duration: {audio.duration_seconds}")
 
-    print(f"End time: {end_time}")
+    logger.info(f"End time: {end_time}")
 
     # Initialize snippet count
     snippet_count = 1
@@ -247,7 +247,7 @@ def split_mp3(input_file, output_dir, split_length):
     while end_time <= len(audio):
         # Extract the snippet
         snippet = audio[start_time:end_time]
-        print(f"Snippet: {snippet}")
+        logger.info(f"Snippet: {snippet}")
 
         # Define the output file name
         output_file = os.path.join(output_dir, f"snippet_{snippet_count}.mp3")
@@ -257,14 +257,14 @@ def split_mp3(input_file, output_dir, split_length):
 
         # Update start and end times for the next snippet
         start_time = end_time
-        print(f"Start time:{start_time}")
+        logger.info(f"Start time:{start_time}")
         end_time = start_time + snippet_length_ms
-        print(f"Start time:{end_time}")
+        logger.info(f"Start time:{end_time}")
 
         # Increment the snippet count
         snippet_count += 1
 
-    print(f"Split {snippet_count - 1} snippets from {input_file}.")
+    logger.info(f"Split {snippet_count - 1} snippets from {input_file}.")
 
 
 def extract_and_store_audio(video_dir, audio_dir):
@@ -280,7 +280,7 @@ def extract_and_store_audio(video_dir, audio_dir):
 
         video = VideoFileClip(video_path)
         video.audio.write_audiofile(audio_path, codec="pcm_s16le", fps=44100)
-        print(f"Audio extracted and saved as {audio_path}")
+        logger.info(f"Audio extracted and saved as {audio_path}")
 
 
 # Speed up using hugging_face-whisper: https://www.reddit.com/r/MachineLearning/comments/14xxg6i/d_what_is_the_most_efficient_version_of_openai/
@@ -339,7 +339,7 @@ def transcribe_single_file(args):
         os.path.join(transcriptions_dir, audio_file.replace(".wav", ".csv")),
         index=False,
     )
-    print(f"Transcription for {audio_file} saved in {transcriptions_dir}")
+    logger.info(f"Transcription for {audio_file} saved in {transcriptions_dir}")
 
 
 def transcribe_audio_files(
@@ -355,7 +355,7 @@ def transcribe_audio_files(
     ]
 
     # Create a pool of processes and map the tasks
-    print("Starting pooling:")
+    logger.info("Starting pooling:")
     with Pool(processes=os.cpu_count()) as pool:
         list(tqdm(pool.imap(transcribe_single_file, tasks), total=len(tasks)))
 
@@ -373,16 +373,16 @@ def transcribe_audio_files(
 #         "hf-internal-testing/librispeech_asr_dummy", "clean", split="validation"
 #     )
 #     sample = ds[0]["audio"]
-#     print(f"Sample:{sample}")
+#     logger.info(f"Sample:{sample}")
 #     filepath = "/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/biology_chapter_3_3/audio_chunks/biology_chapter_3_3-Scene-001.wav"
 #     audio_data, sample_rate = sf.read(filepath)
 
 #     # Prepare the audio dictionary expected by the Whisper pipeline
 #     sample = {"array": audio_data, "sampling_rate": sample_rate}
-#     print(f"WAV sample: {sample}")
+#     logger.info(f"WAV sample: {sample}")
 
 #     prediction = pipe(sample.copy(), batch_size=8, return_timestamps=True)["chunks"]
-#     print(prediction)
+#     logger.info(prediction)
 
 
 if __name__ == "__main__":

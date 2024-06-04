@@ -1,6 +1,6 @@
 import argparse
 import os
-
+from loguru import logger
 import cv2
 
 
@@ -38,7 +38,7 @@ def main():
 
     # Check if camera opened successfully
     if not cap.isOpened():
-        print("Error: Could not open video.")
+        logger.error("Error: Could not open video.")
         exit()
 
     # Get the total number of seconds in the video
@@ -53,9 +53,9 @@ def main():
         if ret:
             # Save the frame as an image file
             cv2.imwrite(f"frame_at_{timestamp}_seconds.jpg", frame)
-            print(f"Frame at {timestamp} seconds saved successfully.")
+            logger.info(f"Frame at {timestamp} seconds saved successfully.")
         else:
-            print(f"Error: Could not read frame at {timestamp} seconds.")
+            logger.error(f"Error: Could not read frame at {timestamp} seconds.")
 
     # When everything done, release the video capture object
     cap.release()

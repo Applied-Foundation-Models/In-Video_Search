@@ -4,6 +4,7 @@ import argparse
 
 import nltk
 import torch
+from loguru import logger
 from nltk.tokenize import sent_tokenize
 from transformers import BertModel, BertTokenizer
 
@@ -44,7 +45,7 @@ def main():
     args = parser.parse_args()
 
     summary = summarize(args.text)
-    print("Summary:", summary)
+    logger.info("Summary:", summary)
 
 
 if __name__ == "__main__":
