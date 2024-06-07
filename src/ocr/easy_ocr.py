@@ -1,4 +1,5 @@
 import easyocr
+from loguru import logger
 
 # Create an OCR reader object
 reader = easyocr.Reader(["en"])
@@ -7,4 +8,4 @@ reader = easyocr.Reader(["en"])
 result = reader.readtext("/Users/haseeb/Desktop/Praktikum/afm-vlm/src/ocr/test.png")
 
 for detection in result:
-    print(detection[1])
+    logger.info(detection[1])

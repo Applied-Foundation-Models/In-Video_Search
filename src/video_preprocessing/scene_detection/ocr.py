@@ -9,6 +9,7 @@ import numpy as np
 import pytesseract
 from pytesseract import Output
 from tqdm import tqdm
+from loguru import logger
 
 
 def get_OCR_pytesseract(img_path):
@@ -102,7 +103,7 @@ def extract_text_from_slide(dir_path, des):
 def load_pickle(pickle_path):
     with open(pickle_path, "rb") as file:
         ocr_dict = pickle.load(file)
-        print(ocr_dict)
+        logger.info(ocr_dict)
 
 
 if __name__ == "__main__":

@@ -6,21 +6,22 @@ import os
 
 import moviepy.editor as mp
 from yt_dlp import YoutubeDL
+from loguru import logger
 
 from src.video_preprocessing.download_videos.download_utils import split_video
 
 
 def preprocess_video(
-    download,
-    url,
-    aud_opts,
-    vid_opts,
-    name,
-    audio_file,
-    input_file,
-    output,
-    split_length=None,
-    uploaded_vid=None,
+        download,
+        url,
+        aud_opts,
+        vid_opts,
+        name,
+        audio_file,
+        input_file,
+        output,
+        split_length=None,
+        uploaded_vid=None,
 ):
     """
     Preprocesses a video by downloading it from YouTube or using a local clip,
@@ -45,8 +46,8 @@ def preprocess_video(
     path_to_data = os.path.join(basepath, "data/raw", name)
     try:
         os.makedirs(path_to_data, exist_ok=True)
-        print("Starting AutoCaptioning...")
-        print(f"Results will be stored in data/{name}")
+        logger.info("Starting AutoCaptioning...")
+        logger.info(f"Results will be stored in data/raw/{name}")
         video_chunks_dir = os.path.join(path_to_data, "video_chunks")
         audio_chunks_dir = os.path.join(path_to_data, "audio_chunks")
         transcriptions_dir = os.path.join(path_to_data, "transcriptions")
@@ -54,10 +55,11 @@ def preprocess_video(
         os.makedirs(video_chunks_dir, exist_ok=True)
         os.makedirs(audio_chunks_dir, exist_ok=True)
         os.makedirs(transcriptions_dir, exist_ok=True)
-        print("Created chunks folders")
+        logger.info("Created chunks folders")
 
     except Exception as e:
-        return print(e)
+        logger.error(f"Error creating directories: {e}")
+        return
 
     # Use audio and video options for youtube-dl if downloading from youtube
     vid_opts["outtmpl"] = f"{path_to_data}/{input_file}"
@@ -76,7 +78,7 @@ def preprocess_video(
         # my_clip.audio.write_audiofile(f"{path_to_data}/{audio_file}")
 
     if split_length is not None:
-        print("Splitting starts:")
+        logger.info("Splitting starts:")
         split_video(
             filename=f"{path_to_data}/{input_file}",
             split_length=split_length,
@@ -86,11 +88,11 @@ def preprocess_video(
         )
         # extract_and_store_audio(video_chunks_dir, audio_chunks_dir)
     else:
-        print("Video is not splitted:")
+        logger.info("Video is not splitted:")
 
         # extract_and_store_audio(path_to_data, audio_chunks_dir)
 
-    print("Video downloaded successfully!")
+    logger.info("Video downloaded successfully!")
 
     return path_to_data
 
