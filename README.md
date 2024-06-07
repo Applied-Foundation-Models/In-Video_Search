@@ -51,6 +51,10 @@ poetry install                              // only for the first execution
 streamlit run src/scripts/app/Startseite.py
 ```
 
+## Run the full pipeline:
+
+Run the pipeline.ipynb notebook
+
 
 ## Downloading Videos from YouTube
 
@@ -101,4 +105,20 @@ python bart_summarizer.py "Another long text for summarization."
 
 ```shell
 python bert_summarizer.py "Your long text goes here."
+```
+
+
+## LLAVA Textual description of Visual features
+
+```shell
+cd src/llm/ollama_implementation/
+
+# To demo captioning using llava
+
+python ollama_experiment.py --llava_captioning
+
+# To demo summarizing using prompting_templates
+
+python ollama_experiment.py --prompt_llm_summary
+
 ```

@@ -3,7 +3,6 @@ import base64
 import json
 from io import BytesIO
 
-import ollama
 import requests
 from PIL import Image
 
@@ -14,51 +13,71 @@ downlaod and install here: https://www.ollama.com/
 """
 
 
-url = "http://localhost:11434/api/generate"
+URL = "http://localhost:11434/api/generate"
 
-headers = {
+HEADERS = {
     "Content-Type": "application/json",
 }
 
 conversation_history = []
 
 
-def generate_response(slide_content, transcription):
-    # conversation_history.append(prompt)
+def prompt_llm_summary(slide_content, transcription, llava_output):
+    """
+    Generate a prompt for summarizing lecture content.
 
-    # full_prompt = "\n".join(conversation_history)
+    Args:
+        slide_content (str): The text extracted from the slides.
+        transcription (str): The spoken content transcribed from the lecture.
+        llava_output (str): Visual insights about slide composition and information on figures displayed in the slide.
 
-    # Define the prompt with placeholders
+    Returns:
+        str: The generated summary of the lecture content.
+
+    Raises:
+        None
+
+    Example:
+        summary = prompt_llm_summary(slide_content, transcription, llava_output)
+    """
+
     prompt_template = """
-    You are a highly intelligent assistant. Your task is to summarize lecture content that includes text extracted from slides and spoken content transcribed from the lecture. Provide a concise summary that highlights the main points discussed on the slides and the key topics spoken by the lecturer in order to make the lecture queryable.
+    Task: Summarize lecture content that includes text extracted from slides, spoken content transcribed
+    from the lecture, and LLAVA output. This will later be used to query a database to find relevant information. So make sure to include the most important keywords
 
     ### Slide Content:
-    {slide_content}
+    {slide_content} (Main points: [list key takeaways])
 
     ### Transcription:
-    {transcription}
+    {transcription} (Key topics: [list main ideas])
+
+    ### LLAVA Output:
+    {llava_output} (Visual insights about slide composure and information on figures displayed in the slide: [summarize key findings])
 
     ### Summary:
-    - **Slide Content Summary:**
-    - [Summarize the main points from the slides]
+    - **Slide Summary:** Please summarize the main points discussed on the slides in
+    approximately 100 words and summarize the key topics spoken by the lecturer, highlighting the most
+    important ideas and concepts.
 
-    - **Spoken Content Summary:**
-    - [Summarize the key topics discussed by the lecturer]
+    **Queryable Information:** tags, categories, or specific concepts (e.g., AI ethics, natural
+    language processing, deep learning)
     """
 
     # Fill the placeholders
-    prompt = prompt_template.format(
-        slide_content=slide_content, transcription=transcription
+    summary = prompt_template.format(
+        slide_content=slide_content,
+        transcription=transcription,
+        llava_output=llava_output,
     )
 
     data = {
         "model": "llama3",
         "stream": False,
-        "prompt": prompt,
-        "options": {"seed": 1, "temperature": 0.9, "num_predict": 77},
+        "prompt": summary,
+        "options": {"seed": 1, "temperature": 0.2},
     }
 
-    response = requests.post(url, headers=headers, data=json.dumps(data))
+    response = requests.post(URL, headers=HEADERS, data=json.dumps(data))
 
     if response.status_code == 200:
         response_text = response.text
@@ -72,6 +91,16 @@ def generate_response(slide_content, transcription):
 
 
 def image_to_base64(image_path, format="JPEG"):
+    """
+    Convert an image file to base64 encoding.
+
+    Parameters:
+    image_path (str): The path to the image file.
+    format (str): The format of the image file. Default is "JPEG".
+
+    Returns:
+    str: The base64 encoded string representation of the image.
+    """
     # Open the image, convert to the specified format, and save to a buffer
     with Image.open(image_path) as image:
         buffer = BytesIO()
@@ -83,54 +112,63 @@ def image_to_base64(image_path, format="JPEG"):
 
 
 def generate_caption_using_llava(image_file):
-    # print(f"\nProcessing {image_file}\n")
-    # with Image.open(image_file) as img:
-    #     with BytesIO() as buffer:
-    #         img.save(buffer, format="PNG")
-    #         image_bytes = buffer.getvalue()
-    # data = {
-    #     "model": "llava",
-    #     "stream": False,
-    #     "prompt": prompt,
-    #     "images": [image_bytes],
-    # }
+    """
+    Generates a caption using the LLAVA model based on an input image.
 
-    # response = requests.post(url, headers=headers, data=json.dumps(data))
-    # print(response)
+    Args:
+        image_file (str): The file path of the input image.
+
+    Returns:
+        str: The generated caption for the input image.
+    """
+
     image = image_to_base64(image_file)
-    res = ollama.chat(
-        model="llava",
-        messages=[
-            {"role": "user", "content": "Describe this image:", "images": [image]}
-        ],
-    )
 
-    print(res["message"]["content"])
-    return res["message"]["content"]
+    data = {
+        "model": "llava",
+        "stream": False,
+        "prompt": "Describe the following slide taken from an academic lecture. Structure your response into the discovered figures as well as headlines and summarize the concepts explained on the slide :",
+        "options": {"seed": 1, "temperature": 0.2},
+        "images": [image],
+    }
 
-    # full_response = ''
-    # # Generate a description of the image
-    # for response in generate(model='llava:13b-v1.6',
-    #                          prompt='describe this image and make sure to include anything notable about it (include text you see in the image):',
-    #                          images=[image_bytes],
-    #                          stream=False):
-    #     # Print the response to the console and add it to the full response
-    #     print(response['response'], end='', flush=True)
-    #     full_response += response['response']
+    response = requests.post(URL, headers=HEADERS, data=json.dumps(data))
+
+    if response.status_code == 200:
+        response_text = response.text
+        data = json.loads(response_text)
+        actual_response = data["response"]
+        conversation_history.append(actual_response)
+        return actual_response
+    else:
+        print("Error:", response.status_code, response.text)
+        return None
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--prompt", type=str, default="Hello, how can I assist you?")
+    parser = argparse.ArgumentParser(description="Run either function 1 or 2")
+    parser.add_argument(
+        "--prompt_llm_summary",
+        action="store_true",
+        default=False,
+        help="Run function 1",
+    )
+    parser.add_argument(
+        "--llava_captioning", action="store_true", default=False, help="Run function 2"
+    )
+
     args = parser.parse_args()
 
-    prompt = args.prompt
-    # response = generate_response(
-    #     slide_content="My text on my slide", transcription="my transcription"
-    # )
-    # print(response)
+    if args.prompt_llm_summary:
+        response = prompt_llm_summary(
+            slide_content="My text on my slide",
+            transcription="my transcription",
+            llava_output="/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/biology_chapter_3_3/extracted_keyframes/biology_chapter_3_3-Scene-032-01.jpg",
+        )
+        print(response)
 
-    text = generate_caption_using_llava(
-        "/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/biology_chapter_3_3/extracted_keyframes/biology_chapter_3_3-Scene-032-01.jpg"
-    )
-    print(text)
+    elif args.llava_captioning:
+        response = generate_caption_using_llava(
+            "/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/biology_chapter_3_3/extracted_keyframes/biology_chapter_3_3-Scene-032-01.jpg"
+        )
+        print(response)
