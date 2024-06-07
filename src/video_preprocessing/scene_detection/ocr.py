@@ -7,9 +7,9 @@ import cv2
 import easyocr
 import numpy as np
 import pytesseract
+from loguru import logger
 from pytesseract import Output
 from tqdm import tqdm
-from loguru import logger
 
 
 def get_OCR_pytesseract(img_path):

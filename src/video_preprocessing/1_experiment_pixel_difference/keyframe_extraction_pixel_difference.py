@@ -1,7 +1,8 @@
 import argparse
-from loguru import logger
+
 import cv2
 import numpy as np
+from loguru import logger
 
 
 def extract_keyframes(video_path, threshold):

@@ -5,23 +5,23 @@ import argparse
 import os
 
 import moviepy.editor as mp
-from yt_dlp import YoutubeDL
 from loguru import logger
+from yt_dlp import YoutubeDL
 
 from src.video_preprocessing.download_videos.download_utils import split_video
 
 
 def preprocess_video(
-        download,
-        url,
-        aud_opts,
-        vid_opts,
-        name,
-        audio_file,
-        input_file,
-        output,
-        split_length=None,
-        uploaded_vid=None,
+    download,
+    url,
+    aud_opts,
+    vid_opts,
+    name,
+    audio_file,
+    input_file,
+    output,
+    split_length=None,
+    uploaded_vid=None,
 ):
     """
     Preprocesses a video by downloading it from YouTube or using a local clip,

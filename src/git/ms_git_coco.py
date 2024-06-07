@@ -1,6 +1,6 @@
 import requests
-from PIL import Image
 from loguru import logger
+from PIL import Image
 from transformers import AutoModelForCausalLM, AutoProcessor
 
 processor = AutoProcessor.from_pretrained("microsoft/git-base-coco")

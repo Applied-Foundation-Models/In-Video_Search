@@ -8,9 +8,9 @@ import os
 import shlex
 import subprocess
 from multiprocessing import Pool
-from loguru import logger
 
 import pandas as pd
+from loguru import logger
 from moviepy.editor import VideoFileClip
 from pydub import AudioSegment
 from tqdm import tqdm
@@ -96,9 +96,13 @@ def split_by_manifest(
                 logger.error("############# Incorrect format ##############")
                 if manifest_type == "json":
                     logger.error("The format of each json array should be:")
-                    logger.error("{start_time: <int>, length: <int>, rename_to: <string>}")
+                    logger.error(
+                        "{start_time: <int>, length: <int>, rename_to: <string>}"
+                    )
                 elif manifest_type == "csv":
-                    logger.error("start_time,length,rename_to should be the first line ")
+                    logger.error(
+                        "start_time,length,rename_to should be the first line "
+                    )
                     logger.error("in the csv file.")
                 logger.error(e)
                 raise SystemExit
@@ -358,6 +362,12 @@ def transcribe_audio_files(
     logger.info("Starting pooling:")
     with Pool(processes=os.cpu_count()) as pool:
         list(tqdm(pool.imap(transcribe_single_file, tasks), total=len(tasks)))
+
+
+def transcription_to_text(transcription_file_path):
+    df = pd.read_csv(transcription_file_path)
+    transcription = " ".join(df["text"].astype(str))
+    return transcription
 
 
 # def hugging_face_whisper():

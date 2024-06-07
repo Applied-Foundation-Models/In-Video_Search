@@ -1,7 +1,9 @@
 import argparse
 import os
 from subprocess import call
+
 from loguru import logger
+
 # pip install --upgrade scenedetect[opencv]
 # https://pyscenedetect.readthedocs.io/en/latest/download/
 

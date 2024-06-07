@@ -1,7 +1,8 @@
 import argparse
 import os
-from loguru import logger
+
 import cv2
+from loguru import logger
 
 
 def parse_args():
