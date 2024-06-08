@@ -1,20 +1,17 @@
 import os
-
 import pytesseract
-from loguru import logger
 from PIL import Image
+from loguru import logger
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-logger.info(dir_path)
-
+# Define the base directory relative to this script
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
 def extract_text_from_image(image_path):
-    image = Image.open(image_path)
+    full_image_path = os.path.join(base_dir, image_path)
+    image = Image.open(full_image_path)
     text = pytesseract.image_to_string(image)
     return text
 
-
-# @ Azza this fails on import as we have custom paths in here
-# logger.info(
-#     extract_text_from_image("/Users/haseeb/Desktop/Praktikum/afm-vlm/src/ocr/test.png")
-# )
+# Specify the relative path to the image from the script's location
+relative_image_path = "test.png"
+logger.info(f"Extracted text: {extract_text_from_image(relative_image_path)}")

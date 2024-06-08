@@ -21,7 +21,6 @@ import whisper
 
 # Removed the main() and if __name__ == "__main__" block
 
-
 def split_by_manifest(
     filename,
     manifest,
