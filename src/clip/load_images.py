@@ -14,6 +14,12 @@ def load_images_from_data(image_urls):
         images.append(Image.open(requests.get(url, stream=True).raw))
     return images
 
+def load_images_from_path(image_paths):
+    images = []
+    for path in image_paths:
+        images.append(Image.open(path))
+    return images
+
 
 def load_and_preprocess_image(image_path, image_size=224):
     """
