@@ -55,13 +55,30 @@ def prompt_llm_summary(slide_content, transcription, llava_output):
     {llava_output} (Visual insights about slide composure and information on figures displayed in the slide: [summarize key findings])
 
     ### Summary:
-    - **Slide Summary:** Please summarize the main points discussed on the slides in
-    approximately 100 words and summarize the key topics spoken by the lecturer, highlighting the most
-    important ideas and concepts.
-
-    **Queryable Information:** tags, categories, or specific concepts (e.g., AI ethics, natural
-    language processing, deep learning)
+    - **Slide Summary:** Combine and understand all this information from slide content and transcription, and llava output. Give a combined final summary of 77 characters/tokens or less of all the overall context and main points discussed on
+    the slides in and summarize the key topics spoken by the lecturer, highlighting the most important ideas and concepts. You can only include keyphrases/ important words. Do not give individual summaries of each transcription, llava output, and slide content. 
+    The output should only contain the summary and no other text. 
+    
+    For example: 
+    ### Slide Content: Nutrients: Micronutrients - Vitamins: organic substances — Usually function as coenzymes - Help to speed up body’s chemical reactions — Only vitamin D can be synthesized in the body 
+    - Sunlight required - Supplementation in areas of low sunlight — Other vitamins are supplied by foods 
+    
+    ### Transcription: Vitaminins are first type of micronutrient, organic substances, most of which the body cannot synthesize on its own.  Once in the body, most vitamins function as what's called a co-enzyme.  
+    A co-enzyme is a molecule that helps enzymes and thus helps to speed up that enzymes work in completing a body's chemical reaction.  Vitamin deficiencies can affect every cell in the body because many different enzymes, all requiring the same vitamin, are involved in numerous bodily functions. 
+    Vitaminins can even help protect the body against cancer and heart disease and even slows the aging process.  Vitamin D, which is also called calcetriol, is the only vitamin that ourselves and our body can synthesize on their own. 
+    But there's a catch, sunlight is required for that process, so people living in climates with little sunlight can more easily develop a deficiency of vitamin D in those areas than those that live in places where there's plenty of sunlight.  Healthcare providers may recommend vitamin D supplements to these people.  
+    You might also see that milk often comes supplemented with vitamin D.  All other vitamins then must be supplied by the foods that we eat.
+    
+    ### LLAVA Output: The slide appears to be from an academic lecture discussing the topic of Microcronutrients.
+    
+    ### Summary: Vitamins: essential micronutrients, coenzymes, speed reactions, only vitamin D synthesized with sunlight, deficiency impacts, supplements needed, diet source.
+    
+    There should be no other output except for the summary. Do not include " Here is your summary", just the output summary. 
+    
+    Sample output: Vitamins: essential micronutrients, coenzymes, speed reactions, only vitamin D synthesized with sunlight, deficiency impacts, supplements needed, diet source.
     """
+    
+    
 
     # Fill the placeholders
     summary = prompt_template.format(
@@ -159,16 +176,16 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.prompt_llm_summary:
-        response = prompt_llm_summary(
-            slide_content="My text on my slide",
-            transcription="my transcription",
-            llava_output="/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/biology_chapter_3_3/extracted_keyframes/biology_chapter_3_3-Scene-032-01.jpg",
-        )
-        print(response)
+    # if args.prompt_llm_summary:
+    response = prompt_llm_summary(
+        slide_content="My text on my slide",
+        transcription="my transcription",
+        llava_output="/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/biology_chapter_3_3/extracted_keyframes/biology_chapter_3_3-Scene-032-01.jpg",
+    )
+    print(response)
 
-    elif args.llava_captioning:
-        response = generate_caption_using_llava(
-            "/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/biology_chapter_3_3/extracted_keyframes/biology_chapter_3_3-Scene-032-01.jpg"
-        )
-        print(response)
+    # elif args.llava_captioning:
+    #     response = generate_caption_using_llava(
+    #         "/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/biology_chapter_3_3/extracted_keyframes/biology_chapter_3_3-Scene-032-01.jpg"
+    #     )
+    #     print(response)
