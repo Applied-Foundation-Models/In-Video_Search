@@ -107,6 +107,91 @@ def prompt_llm_summary(slide_content, transcription, llava_output):
         return None
 
 
+def prompt_llm_extensive_summary(slide_content, transcription, llava_output):
+    """
+    Generate a prompt for summarizing lecture content which is more extensive.
+
+    Args:
+        slide_content (str): The text extracted from the slides.
+        transcription (str): The spoken content transcribed from the lecture.
+        llava_output (str): Visual insights about slide composition and information on figures displayed in the slide.
+
+    Returns:
+        str: The generated long summary of the lecture content.
+
+    Raises:
+        None
+
+    Example:
+        summary = prompt_llm_extensive_summary(slide_content, transcription, llava_output)
+    """
+
+    prompt_template = """
+    Task: Summarize lecture content that includes text extracted from slides, spoken content transcribed
+    from the lecture, and LLAVA output. This will later be used to query a database to find relevant information. So make sure to include the most important keywords
+
+    ### Slide Content:
+    {slide_content} (Main points: [list key takeaways])
+
+    ### Transcription:
+    {transcription} (Key topics: [list main ideas])
+
+    ### LLAVA Output:
+    {llava_output} (Visual insights about slide composure and information on figures displayed in the slide: [summarize key findings])
+
+    ### Summary:
+    - **Slide Summary:** Combine and understand all this information from slide content and transcription, and llava output. Give a combined extensive summary in less than 150 words. Keep in account the overall context and main points discussed on
+    the slides in and summarize the key topics spoken by the lecturer, highlighting the most important ideas and concepts.  Do not give individual summaries of each transcription, llava output, and slide content, but rather one single combined summary
+    The output should only contain the summary and no other text. 
+    
+    For example: 
+    ### Slide Content: Nutrients: Micronutrients - Vitamins: organic substances — Usually function as coenzymes - Help to speed up body’s chemical reactions — Only vitamin D can be synthesized in the body 
+    - Sunlight required - Supplementation in areas of low sunlight — Other vitamins are supplied by foods 
+    
+    ### Transcription: Vitaminins are first type of micronutrient, organic substances, most of which the body cannot synthesize on its own.  Once in the body, most vitamins function as what's called a co-enzyme.  
+    A co-enzyme is a molecule that helps enzymes and thus helps to speed up that enzymes work in completing a body's chemical reaction.  Vitamin deficiencies can affect every cell in the body because many different enzymes, all requiring the same vitamin, are involved in numerous bodily functions. 
+    Vitaminins can even help protect the body against cancer and heart disease and even slows the aging process.  Vitamin D, which is also called calcetriol, is the only vitamin that ourselves and our body can synthesize on their own. 
+    But there's a catch, sunlight is required for that process, so people living in climates with little sunlight can more easily develop a deficiency of vitamin D in those areas than those that live in places where there's plenty of sunlight.  Healthcare providers may recommend vitamin D supplements to these people.  
+    You might also see that milk often comes supplemented with vitamin D.  All other vitamins then must be supplied by the foods that we eat.
+    
+    ### LLAVA Output: The slide appears to be from an academic lecture discussing the topic of Microcronutrients.
+    
+    ### Summary: Vitamins: The lecture focused on micronutrients, specifically vitamins. Vitamins are organic substances that primarily function as coenzymes, aiding in the body's chemical reactions. Most vitamins cannot be synthesized by the body and must be obtained from food, except for Vitamin D, which requires sunlight for synthesis. In regions with low sunlight, Vitamin D deficiency is more common, and supplementation is often recommended. Vitamins are essential for numerous bodily functions and can protect against diseases and aging.
+    
+    There should be no other output except for the summary. Do not include " Here is your summary", just the output summary. 
+    
+    Sample output: The lecture focused on micronutrients, specifically vitamins. Vitamins are organic substances that primarily function as coenzymes, aiding in the body's chemical reactions. Most vitamins cannot be synthesized by the body and must be obtained from food, except for Vitamin D, which requires sunlight for synthesis. In regions with low sunlight, Vitamin D deficiency is more common, and supplementation is often recommended. Vitamins are essential for numerous bodily functions and can protect against diseases and aging.
+    """
+    
+    
+
+    # Fill the placeholders
+    summary = prompt_template.format(
+        slide_content=slide_content,
+        transcription=transcription,
+        llava_output=llava_output,
+    )
+
+    data = {
+        "model": "llama3",
+        "stream": False,
+        "prompt": summary,
+        "options": {"seed": 1, "temperature": 0.2},
+    }
+
+    response = requests.post(URL, headers=HEADERS, data=json.dumps(data))
+
+    if response.status_code == 200:
+        response_text = response.text
+        data = json.loads(response_text)
+        actual_response = data["response"]
+        conversation_history.append(actual_response)
+        return actual_response
+    else:
+        print("Error:", response.status_code, response.text)
+        return None
+    
+    
 def image_to_base64(image_path, format="JPEG"):
     """
     Convert an image file to base64 encoding.
