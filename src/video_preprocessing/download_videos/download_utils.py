@@ -418,7 +418,8 @@ def create_metadata(
         "llava_result": llava_results,
         "clip_text": clip_llm_summary,
         "llm_long_summary": extensive_summary,
-        "clip_embedding": "",
+        "clip_text_embedding": "",
+        "clip_image_embedding": "",
         "long_description_embedding": "",
     }
 
