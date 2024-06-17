@@ -409,6 +409,8 @@ def create_metadata(
     llava_results,
     clip_llm_summary,
     extensive_summary,
+    clip_text_embedding,
+    clip_image_embedding,
 ):
     video_metadata = {
         "img_path": image_path,
@@ -418,8 +420,8 @@ def create_metadata(
         "llava_result": llava_results,
         "clip_text": clip_llm_summary,
         "llm_long_summary": extensive_summary,
-        "clip_text_embedding": "",
-        "clip_image_embedding": "",
+        "clip_text_embedding": clip_text_embedding,
+        "clip_image_embedding": clip_image_embedding,
         "long_description_embedding": "",
     }
 
