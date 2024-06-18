@@ -67,11 +67,10 @@ class CLIPEmbeddingsModel:
 
     def generate_image_embeddings(self, text_transcription, image):
         inputs = self.processor(text=text_transcription, images=image, return_tensors="pt", padding=True)
+        logger.info(f"Inputs id shape: {inputs['input_ids'].shape}")
+        logger.info(f"Positions id shape: {inputs['position_ids'].shape}")
         outputs = self.model(**inputs)
-
-        embeddings = self.process_clip_tensors(outputs)
-
-        logger.info(f"Embeddings: {embeddings}")
+        embeddings = outputs
         return embeddings
 
     def generate_dataset_embeddings(self, text_transcriptions):

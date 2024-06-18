@@ -17,19 +17,21 @@ from tqdm import tqdm
 
 import whisper
 
+
 # The rest of the functions remain unchanged
 
 # Removed the main() and if __name__ == "__main__" block
 
+whisper.load
 
 def split_by_manifest(
-    filename,
-    manifest,
-    output_dir,
-    vcodec="copy",
-    acodec="copy",
-    extra="",
-    **kwargs,
+        filename,
+        manifest,
+        output_dir,
+        vcodec="copy",
+        acodec="copy",
+        extra="",
+        **kwargs,
 ):
     """Split video into segments based on the given manifest file.
 
@@ -57,15 +59,15 @@ def split_by_manifest(
             raise SystemExit
 
         split_cmd = [
-            "ffmpeg",
-            "-i",
-            filename,
-            "-vcodec",
-            vcodec,
-            "-acodec",
-            acodec,
-            "-y",
-        ] + shlex.split(extra)
+                        "ffmpeg",
+                        "-i",
+                        filename,
+                        "-vcodec",
+                        vcodec,
+                        "-acodec",
+                        acodec,
+                        "-y",
+                    ] + shlex.split(extra)
         try:
             fileext = filename.split(".")[-1]
         except IndexError as e:
@@ -132,14 +134,14 @@ def ceildiv(a, b):
 
 
 def split_by_seconds(
-    filename,
-    split_length,
-    output_dir,
-    vcodec="copy",
-    acodec="copy",
-    extra="",
-    video_length=None,
-    **kwargs,
+        filename,
+        split_length,
+        output_dir,
+        vcodec="copy",
+        acodec="copy",
+        extra="",
+        video_length=None,
+        **kwargs,
 ):
     if split_length and split_length <= 0:
         logger.info("Split length can't be 0")
@@ -153,14 +155,14 @@ def split_by_seconds(
         raise SystemExit
 
     split_cmd = [
-        "ffmpeg",
-        "-i",
-        filename,
-        "-vcodec",
-        vcodec,
-        "-acodec",
-        acodec,
-    ] + shlex.split(extra)
+                    "ffmpeg",
+                    "-i",
+                    filename,
+                    "-vcodec",
+                    vcodec,
+                    "-acodec",
+                    acodec,
+                ] + shlex.split(extra)
     # Ensure the output directory exists
 
     try:
@@ -347,7 +349,7 @@ def transcribe_single_file(args):
 
 
 def transcribe_audio_files(
-    audio_dir, transcriptions_dir, model_type="small", lang="en"
+        audio_dir, transcriptions_dir, model_type="small", lang="en"
 ):
     os.makedirs(transcriptions_dir, exist_ok=True)
     audio_files = [f for f in os.listdir(audio_dir) if f.endswith(".wav")]
@@ -401,16 +403,16 @@ def transcription_to_text(transcription_file_path):
 
 
 def create_metadata(
-    keyframe_num,
-    image_path,
-    timestamps,
-    transcription,
-    ocr_extracted_text,
-    llava_results,
-    clip_llm_summary,
-    extensive_summary,
-    clip_text_embedding,
-    clip_image_embedding,
+        keyframe_num,
+        image_path,
+        timestamps,
+        transcription,
+        ocr_extracted_text,
+        llava_results,
+        clip_llm_summary,
+        extensive_summary,
+        clip_text_embedding,
+        clip_image_embedding,
 ):
     video_metadata = {
         "img_path": image_path,

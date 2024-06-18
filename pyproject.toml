@@ -11,13 +11,11 @@ transformers = "^4.40.2"
 huggingface-hub = "^0.23.0"
 torch = "^2.3.0"
 image = "^1.5.33"
-jupyter = "^1.0.0"
 matplotlib = "^3.8.4"
 scikit-image = "^0.23.2"
 scikit-learn = "^1.4.2"
 hdbscan = { version = "^0.8.33", optional = true }
 yt-dlp = "^2024.4.9"
-openai-whisper = {git = "https://github.com/openai/whisper.git"}
 moviepy = "^1.0.3"
 pandas = "^2.2.2"
 optparse-pretty = "^0.1.1"
@@ -44,6 +42,8 @@ av = "^12.1.0"
 opencv-python-headless = "4.9.0.80"
 opencv-python = "4.9.0.80"
 ffmpeg = "^1.4"
+openai-whisper = {git = "https://github.com/openai/whisper.git"}
+jupyter = "^1.0.0"
 
 
 [tool.poetry.extras]
