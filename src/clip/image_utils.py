@@ -1,7 +1,8 @@
-import requests
-from PIL import Image
 import os
+
+import requests
 from loguru import logger
+from PIL import Image
 
 
 def load_images_from_data(image_urls):
@@ -23,8 +24,8 @@ def generate_image_metadata(image_paths):
     for path in image_paths:
         filename = os.path.basename(path)
         metadata_entry = {
-            'filename': filename,
-            'path': path,
+            "filename": filename,
+            "path": path,
         }
         metadata.append(metadata_entry)
 
