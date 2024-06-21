@@ -81,7 +81,6 @@ class CLIPEmbeddingsModel:
             truncation=True,
         )
 
-        print(f"Inputs:{inputs}")
         # logger.info(f"Inputs id shape: {inputs['input_ids'].shape}")
         # logger.info(f"Positions id shape: {inputs['position_ids'].shape}")
         outputs = self.model(**inputs)
