@@ -1,5 +1,5 @@
-from ocr.pytesseract_image_to_text import extract_text_from_image
-from image_utils import load_images_from_path, generate_image_metadata
+from src.ocr.pytesseract_image_to_text import extract_text_from_image
+from src.clip.image_utils import load_images_from_path, generate_image_metadata
 from transformers import CLIPModel, CLIPProcessor
 from loguru import logger
 from PIL import Image
@@ -73,6 +73,21 @@ class CLIPEmbeddingsModel:
 
         logger.info(f"Embeddings: {self.embeddings}")
         return outputs
+
+    def generate_image_embeddings(self, text_transcription, image):
+        inputs = self.processor(
+            text=text_transcription,
+            images=image,
+            return_tensors="pt",
+            max_length=77,
+            truncation=True,
+        )
+
+        # logger.info(f"Inputs id shape: {inputs['input_ids'].shape}")
+        # logger.info(f"Positions id shape: {inputs['position_ids'].shape}")
+        outputs = self.model(**inputs)
+        embeddings = outputs
+        return embeddings
 
     def process_clip_tensors(self, outputs):
         image_embeds = outputs["image_embeds"]

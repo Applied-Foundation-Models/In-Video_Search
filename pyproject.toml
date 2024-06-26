@@ -44,6 +44,8 @@ av = "^12.1.0"
 opencv-python-headless = "4.9.0.80"
 opencv-python = "4.9.0.80"
 ffmpeg = "^1.4"
+numpy = "<2.0.0"
+cv2-tools = "^2.4.0"
 
 
 [tool.poetry.extras]

@@ -21,6 +21,7 @@ import whisper
 
 # Removed the main() and if __name__ == "__main__" block
 
+
 def split_by_manifest(
     filename,
     manifest,
@@ -365,8 +366,13 @@ def transcribe_audio_files(
 
 def transcription_to_text(transcription_file_path):
     df = pd.read_csv(transcription_file_path)
-    transcription = " ".join(df["text"].astype(str))
-    return transcription
+    if not df.empty:
+        transcription = " ".join(df["text"].astype(str))
+        timestamps = [df["start"].iloc[0], df["end"].iloc[-1]]
+    else:
+        transcription = ""
+        timestamps = [0, 0]
+    return transcription, timestamps
 
 
 # def hugging_face_whisper():
@@ -392,6 +398,34 @@ def transcription_to_text(transcription_file_path):
 
 #     prediction = pipe(sample.copy(), batch_size=8, return_timestamps=True)["chunks"]
 #     logger.info(prediction)
+
+
+def create_metadata(
+    keyframe_num,
+    image_path,
+    timestamps,
+    transcription,
+    ocr_extracted_text,
+    llava_results,
+    clip_llm_summary,
+    extensive_summary,
+    clip_text_embedding,
+    clip_image_embedding,
+):
+    video_metadata = {
+        "img_path": image_path,
+        "timestamps": timestamps,
+        "transcription": transcription,
+        "ocr_extracted_text": ocr_extracted_text,
+        "llava_result": llava_results,
+        "clip_text": clip_llm_summary,
+        "llm_long_summary": extensive_summary,
+        "clip_text_embedding": clip_text_embedding,
+        "clip_image_embedding": clip_image_embedding,
+        "long_description_embedding": "",
+    }
+
+    return keyframe_num, video_metadata
 
 
 if __name__ == "__main__":
