@@ -21,6 +21,7 @@ class CLIPEmbeddingsModel:
         self.images = None
         self.embeddings = None
         self.metadata = None
+        self.img_paths = None
 
     def load_and_process_dataset(self, image_paths):
         images = load_images_from_path(image_paths)
@@ -86,6 +87,7 @@ class CLIPEmbeddingsModel:
         # logger.info(f"Inputs id shape: {inputs['input_ids'].shape}")
         # logger.info(f"Positions id shape: {inputs['position_ids'].shape}")
         outputs = self.model(**inputs)
+        self.embeddings = self.process_clip_tensors(outputs)
         embeddings = outputs
         return embeddings
 
@@ -105,7 +107,9 @@ class CLIPEmbeddingsModel:
     # search for similar images in database (delete duplicates? or keep them?)
     def search_similar_images(self, query):
         # Get text embeddings of class dataset
-        text_embeddings = self.embeddings.text_embeds
+        # text_embeddings = self.embeddings.text_embeds
+        # text_embeddings = self.embeddings
+        text_embeddings = self.text_embeddings
 
         # Generate query text embeddings
         query_text_embedding = self.process_and_embedd_query_text(query)
@@ -152,13 +156,12 @@ class CLIPEmbeddingsModel:
         plt.show()
 
     def search_similar_images(self, query):
-        text_embeddings = self.embeddings["text_embeds"]
+        # text_embeddings = self.embeddings["text_embeds"]
+        text_embeddings = self.text_embeddings
+        logger.info(f"Text embeddings {text_embeddings.shape}")
 
         # Generate query text embeddings
         query_text_embedding = self.process_and_embedd_query_text(query)
-
-        logger.info(f"Query text embedding shape: {query_text_embedding.shape}")
-        logger.info(f"Text embeddings shape: {text_embeddings.shape}")
 
         # Compute cosine similarity between query text and all text embeddings
         similarities = cosine_similarity(query_text_embedding, text_embeddings, dim=1)
@@ -172,6 +175,31 @@ class CLIPEmbeddingsModel:
 
         # Display the most similar image
         self.__display_similar_image(self.images[max_similarity_index])
+
+
+    def search_similar_image_revisited(self, query):
+        # Get text embeddings of class dataset
+        text_embeddings = self.text_embeddings
+        logger.info(f"Text embeddings {text_embeddings.shape}")
+
+        # Generate query text embeddings
+        query_text_embedding = self.process_and_embedd_query_text(query)
+
+        # Compute cosine similarity between query text and all text embeddings
+        similarities = cosine_similarity(query_text_embedding, text_embeddings, dim=1)
+        logger.info(f"Similarity scores: {similarities}")
+
+        logger.info(f"Similarity scores: {similarities}")
+
+        max_similarity_index = torch.argmax(similarities).item()
+        logger.info(f"Max similarity index: {max_similarity_index}")
+
+        # get image path
+        image_path = self.img_paths[max_similarity_index]
+        logger.info(f"Image path: {image_path}")
+
+
+
 
 
 # main function to test the class
