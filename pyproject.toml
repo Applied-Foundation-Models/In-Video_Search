@@ -44,6 +44,8 @@ opencv-python = "4.9.0.80"
 ffmpeg = "^1.4"
 openai-whisper = {git = "https://github.com/openai/whisper.git"}
 jupyter = "^1.0.0"
+sentence-transformers = "^3.0.1"
+numpy = "1.26.4"
 
 
 [tool.poetry.extras]
