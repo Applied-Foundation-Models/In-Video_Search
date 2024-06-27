@@ -364,15 +364,20 @@ def transcribe_audio_files(
         list(tqdm(pool.imap(transcribe_single_file, tasks), total=len(tasks)))
 
 
-def transcription_to_text(transcription_file_path):
-    df = pd.read_csv(transcription_file_path)
-    if not df.empty:
-        transcription = " ".join(df["text"].astype(str))
-        timestamps = [df["start"].iloc[0], df["end"].iloc[-1]]
+def transcription_to_text(keyframe, transcription_file_path, timestamp_file_path):
+    # Load the CSV file into a DataFrame
+    df_timestamps = pd.read_csv(timestamp_file_path, skiprows=1)
+
+    timestamps = df_timestamps.set_index("Scene Number")[
+        ["Start Time (seconds)", "End Time (seconds)"]
+    ].T.to_dict("list")
+
+    df_transcription = pd.read_csv(transcription_file_path)
+    if not df_transcription.empty:
+        transcription = " ".join(df_transcription["text"].astype(str))
     else:
         transcription = ""
-        timestamps = [0, 0]
-    return transcription, timestamps
+    return transcription, timestamps[keyframe]
 
 
 # def hugging_face_whisper():
