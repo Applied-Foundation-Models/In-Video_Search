@@ -167,6 +167,10 @@ class CLIPEmbeddingsModel:
         similarities = cosine_similarity(query_text_embedding, text_embeddings, dim=1)
         logger.info(f"Similarity scores: {similarities}")
 
+        indices = torch.topk(similarities, 3)
+
+        logger.info(f"Top 3 Similarity scores: {indices}")
+
         # Find the index of the maximum similarity score
         max_similarity_index = torch.argmax(similarities).item()
         max_similarity = similarities[max_similarity_index].item()
@@ -175,7 +179,6 @@ class CLIPEmbeddingsModel:
 
         # Display the most similar image
         self.__display_similar_image(self.images[max_similarity_index])
-
 
     def search_similar_image_revisited(self, query):
         # Get text embeddings of class dataset
@@ -197,9 +200,6 @@ class CLIPEmbeddingsModel:
         # get image path
         image_path = self.img_paths[max_similarity_index]
         logger.info(f"Image path: {image_path}")
-
-
-
 
 
 # main function to test the class
