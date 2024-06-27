@@ -37,7 +37,7 @@ def detect_scenes(file_path):
                         video_path=video_path,
                         scenes=os.path.join(file_path, "extracted_keyframes"),
                         video_path_wo_suffix=file[:-4],
-                        treshhold=2,
+                        treshhold=5,
                         image_number=1,
                         video_output_dir=os.path.join(file_path, "scene_snippets"),
                     )
