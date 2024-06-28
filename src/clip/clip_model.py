@@ -26,7 +26,6 @@ class CLIPEmbeddingsModel:
         self.text_embeddings = None
         self.metadata = None
         self.img_paths = None
-
     def load_and_process_dataset(self, image_paths):
         images = load_images_from_path(image_paths)
         self.images = images
