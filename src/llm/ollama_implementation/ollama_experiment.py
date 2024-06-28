@@ -2,7 +2,7 @@ import argparse
 import base64
 import json
 from io import BytesIO
-
+import re
 import requests
 from PIL import Image
 
@@ -57,7 +57,7 @@ def prompt_llm_summary(slide_content, transcription, llava_output):
     ### Summary:
     - **Slide Summary:** Combine and understand all this information from slide content and transcription, and llava output. Give a combined final summary of 77 characters/tokens or less of all the overall context and main points discussed on
     the slides in and summarize the key topics spoken by the lecturer, highlighting the most important ideas and concepts. You can only include keyphrases/ important words. Do not give individual summaries of each transcription, llava output, and slide content.
-    The output should only contain the summary and no other text.
+    The output should only contain the summary and no other text. Output should strictly be in JSON Format and no other format where key is the summary and value is the output.
 
     For example:
     ### Slide Content: Nutrients: Micronutrients - Vitamins: organic substances — Usually function as coenzymes - Help to speed up body’s chemical reactions — Only vitamin D can be synthesized in the body
@@ -73,9 +73,9 @@ def prompt_llm_summary(slide_content, transcription, llava_output):
 
     ### Summary: Vitamins: essential micronutrients, coenzymes, speed reactions, only vitamin D synthesized with sunlight, deficiency impacts, supplements needed, diet source.
 
-    There should be no other output except for the summary. Do not include " Here is your summary", just the output summary.
+    There should be no other output except for the summary. Do not include " Here is your summary". 
 
-    Sample output: Vitamins: essential micronutrients, coenzymes, speed reactions, only vitamin D synthesized with sunlight, deficiency impacts, supplements needed, diet source.
+    Sample output:  Vitamins essential micronutrients, coenzymes, speed reactions, only vitamin D synthesized with sunlight, deficiency impacts, supplements needed, diet source.
     """
 
     # Fill the placeholders
@@ -140,7 +140,7 @@ def prompt_llm_extensive_summary(slide_content, transcription, llava_output):
     ### Summary:
     - **Slide Summary:** Combine and understand all this information from slide content and transcription, and llava output. Give a combined extensive summary in less than 150 words. Keep in account the overall context and main points discussed on
     the slides in and summarize the key topics spoken by the lecturer, highlighting the most important ideas and concepts.  Do not give individual summaries of each transcription, llava output, and slide content, but rather one single combined summary
-    The output should only contain the summary and no other text.
+    The output should only contain the summary and no other text.  Output should strictly be in JSON Format and no other format where key is the summary and value is the output.
 
     For example:
     ### Slide Content: Nutrients: Micronutrients - Vitamins: organic substances — Usually function as coenzymes - Help to speed up body’s chemical reactions — Only vitamin D can be synthesized in the body
@@ -156,7 +156,7 @@ def prompt_llm_extensive_summary(slide_content, transcription, llava_output):
 
     ### Summary: Vitamins: The lecture focused on micronutrients, specifically vitamins. Vitamins are organic substances that primarily function as coenzymes, aiding in the body's chemical reactions. Most vitamins cannot be synthesized by the body and must be obtained from food, except for Vitamin D, which requires sunlight for synthesis. In regions with low sunlight, Vitamin D deficiency is more common, and supplementation is often recommended. Vitamins are essential for numerous bodily functions and can protect against diseases and aging.
 
-    There should be no other output except for the summary. Do not include " Here is your summary", just the output summary.
+    There should be no other output except for the summary. Do not include " Here is your summary". The key of JSON output should be "Summary" and value should be the generated output. 
 
     Sample output: The lecture focused on micronutrients, specifically vitamins. Vitamins are organic substances that primarily function as coenzymes, aiding in the body's chemical reactions. Most vitamins cannot be synthesized by the body and must be obtained from food, except for Vitamin D, which requires sunlight for synthesis. In regions with low sunlight, Vitamin D deficiency is more common, and supplementation is often recommended. Vitamins are essential for numerous bodily functions and can protect against diseases and aging.
     """
@@ -186,6 +186,23 @@ def prompt_llm_extensive_summary(slide_content, transcription, llava_output):
     else:
         print("Error:", response.status_code, response.text)
         return None
+
+def extract_json(text):
+    # Regular expression to find a JSON object in a string
+    json_pattern = re.compile(r'(\{.*?\})', re.DOTALL)
+    match = json_pattern.search(text)
+    
+    if match:
+        json_str = match.group(1)
+        try:
+            # Try to parse the JSON string to ensure it's valid
+            json_obj = json.loads(json_str)
+            return json_obj
+        except json.JSONDecodeError:
+            return None
+    else:
+        return None
+    
 
 
 def image_to_base64(image_path, format="JPEG"):
