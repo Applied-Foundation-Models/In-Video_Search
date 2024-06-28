@@ -1,4 +1,4 @@
-from src.clip.image_utils import generate_image_metadata
+from src.clip.image_utils import generate_image_metadata, load_images_from_path
 from src.text_embedder.embedder import text_to_embedding_transformer
 from transformers import CLIPModel, CLIPProcessor
 from sentence_transformers import SentenceTransformer
@@ -23,6 +23,11 @@ class CLIPEmbeddingsModel:
         self.text_embeddings = None
         self.metadata = None
         self.img_paths = None
+        self.images = None
+
+    def load_and_process_dataset(self, image_paths):
+        images = load_images_from_path(image_paths)
+        return images
 
     def process_image(self, image_path, text):
         opened_image = Image.open(image_path)
@@ -38,6 +43,11 @@ class CLIPEmbeddingsModel:
         self.metadata = metadata
         logger.info(f"Metadata: {metadata}")
         return metadata
+
+    def generate_dataset_embeddings_standard_tokenizer(self, text):
+        model = self.text_embedder
+        query_text_embedding = text_to_embedding_transformer(text, model)
+        return query_text_embedding
 
     # store dataset in database
     def store_dataset_locally(self, metadata, embeddings):
@@ -67,6 +77,7 @@ class CLIPEmbeddingsModel:
         return combined_data
 
     def generate_dataset_embeddings(self, text_transcriptions):
+        self.images = self.load_and_process_dataset(self.img_paths)
         inputs = self.processor(text=text_transcriptions, images=self.images, return_tensors="pt", padding=True)
         outputs = self.model(**inputs)
 
@@ -187,11 +198,12 @@ class CLIPEmbeddingsModel:
             # print len of img paths
             if max_similarity_index <= len(self.img_paths):
                 logger.info(f"#####GT is keyframe number {gt}#####")
-                logger.info(f"Max similarity for index {max_similarity_index} is the keyframe {self.img_paths[max_similarity_index]}")
+                logger.info(
+                    f"Max similarity for index {max_similarity_index} is the keyframe {self.img_paths[max_similarity_index]}")
 
                 # Can display the image since paths are faulty 'magic-rabbit'
-                #opened_image = Image.open(self.img_paths[max_similarity_index])
-                #self.__display_similar_image(opened_image)
+                # opened_image = Image.open(self.img_paths[max_similarity_index])
+                # self.__display_similar_image(opened_image)
                 pass
             else:
                 logger.info(f"Index {max_similarity_index} is out of range")
@@ -202,7 +214,6 @@ class CLIPEmbeddingsModel:
 
         # Generate query text embeddings with CLIP
         query_text_embedding = self.process_and_embedd_query_text(query)
-
 
         logger.info(f"Query text embedding shape: {query_text_embedding.shape}")
         logger.info(f"Text embeddings shape: {text_embeddings.shape}")
@@ -221,11 +232,12 @@ class CLIPEmbeddingsModel:
             # print len of img paths
             if max_similarity_index <= len(self.img_paths):
                 logger.info(f"#####GT is keyframe number {gt}#####")
-                logger.info(f"Max similarity for index {max_similarity_index} is the keyframe {self.img_paths[max_similarity_index]}")
+                logger.info(
+                    f"Max similarity for index {max_similarity_index} is the keyframe {self.img_paths[max_similarity_index]}")
 
                 # Can display the image since paths are faulty 'magic-rabbit'
-                #opened_image = Image.open(self.img_paths[max_similarity_index])
-                #self.__display_similar_image(opened_image)
+                # opened_image = Image.open(self.img_paths[max_similarity_index])
+                # self.__display_similar_image(opened_image)
                 pass
             else:
                 logger.info(f"Index {max_similarity_index} is out of range")
