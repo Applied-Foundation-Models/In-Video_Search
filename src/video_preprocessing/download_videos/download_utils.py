@@ -416,6 +416,8 @@ def create_metadata(
     extensive_summary,
     clip_text_embedding,
     clip_image_embedding,
+    standard_text_embedding,
+    extensive_text_embedding
 ):
     video_metadata = {
         "img_path": image_path,
@@ -427,6 +429,8 @@ def create_metadata(
         "llm_long_summary": extensive_summary,
         "clip_text_embedding": clip_text_embedding,
         "clip_image_embedding": clip_image_embedding,
+        "standard_text_embedding": standard_text_embedding,
+        "extensive_text_embedding": extensive_text_embedding,
         "long_description_embedding": "",
     }
 
