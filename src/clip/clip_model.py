@@ -1,5 +1,4 @@
-from src.ocr.pytesseract_image_to_text import extract_text_from_image
-from src.clip.image_utils import load_images_from_path, generate_image_metadata
+from src.clip.image_utils import generate_image_metadata
 from src.text_embedder.embedder import text_to_embedding_transformer
 from transformers import CLIPModel, CLIPProcessor
 from sentence_transformers import SentenceTransformer
@@ -8,7 +7,6 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from torch.nn.functional import cosine_similarity
 import numpy as np
-import os
 import torch
 
 
@@ -21,20 +19,19 @@ class CLIPEmbeddingsModel:
         self.text_embedder = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
         self.fig = plt.figure(figsize=(8, 20))
         self.dataset = None
-        self.images = None
         self.embeddings = None
         self.text_embeddings = None
         self.metadata = None
         self.img_paths = None
-    def load_and_process_dataset(self, image_paths):
-        images = load_images_from_path(image_paths)
-        self.images = images
-        return images
 
     def process_image(self, image_path, text):
         opened_image = Image.open(image_path)
         processed_image = self.processor(text_classes=text, images=opened_image, return_tensors="pt", padding=True)
         return processed_image
+
+    def open_image(self, image_path):
+        opened_image = Image.open(image_path)
+        return opened_image
 
     def generate_dataset_metadata(self, image_paths):
         metadata = generate_image_metadata(image_paths)
@@ -182,14 +179,15 @@ class CLIPEmbeddingsModel:
 
         indices = torch.topk(similarities, 3)
 
-        logger.info(f"Top 3 Similarity scores: {indices} - GT: {gt}")
+        logger.info(f"Top 3 Similarity scores: {indices} - GT is keyframe {gt}")
 
         # Display the most similar image
         # dispolay top 3 images
         for i in range(3):
             max_similarity_index = indices.indices[i].item()
-            logger.info(f"Max similarity index: {max_similarity_index}")
-            self.__display_similar_image(self.images[max_similarity_index])
+            logger.info(f"Max similarity for index {max_similarity_index} is the keyframe {self.img_paths[max_similarity_index]}")
+            opened_image = Image.open(self.img_paths[max_similarity_index])
+            self.__display_similar_image(opened_image)
 
     def search_similar_image_revisited(self, query):
         # Get text embeddings of class dataset
