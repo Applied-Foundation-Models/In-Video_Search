@@ -170,24 +170,28 @@ class CLIPEmbeddingsModel:
 
         query_text_embedding = text_to_embedding_transformer(query, model)
 
-        logger.info(f"Query text embedding shape: {query_text_embedding.shape}")
-        logger.info(f"Text embeddings shape: {text_embeddings.shape}")
+        #logger.info(f"Query text embedding shape: {query_text_embedding.shape}")
+        #logger.info(f"Text embeddings shape: {text_embeddings.shape}")
 
         # Compute cosine similarity between query text and all text embeddings
         similarities = cosine_similarity(query_text_embedding, text_embeddings, dim=1)
-        logger.info(f"Similarity scores: {similarities}")
 
         indices = torch.topk(similarities, 3)
 
-        logger.info(f"Top 3 Similarity scores: {indices} - GT is keyframe {gt}")
+        logger.info(f"Top 3 Similarity scores: {indices} - GT is keyframe number {gt}")
 
-        # Display the most similar image
-        # dispolay top 3 images
+        logger.info(f"Length of img paths: {len(self.img_paths)}")
+
         for i in range(3):
             max_similarity_index = indices.indices[i].item()
-            logger.info(f"Max similarity for index {max_similarity_index} is the keyframe {self.img_paths[max_similarity_index]}")
-            opened_image = Image.open(self.img_paths[max_similarity_index])
-            self.__display_similar_image(opened_image)
+            # print len of img paths
+            if max_similarity_index <= len(self.img_paths):
+                logger.info(f"#####GT is keyframe number {gt}#####")
+                logger.info(f"Max similarity for index {max_similarity_index} is the keyframe {self.img_paths[max_similarity_index]}")
+                #opened_image = Image.open(self.img_paths[max_similarity_index])
+                #self.__display_similar_image(opened_image)
+            else:
+                logger.info(f"Index {max_similarity_index} is out of range")
 
     def search_similar_image_revisited(self, query):
         # Get text embeddings of class dataset
