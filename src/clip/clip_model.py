@@ -113,8 +113,6 @@ class CLIPEmbeddingsModel:
     # search for similar images in database (delete duplicates? or keep them?)
     def search_similar_images(self, query):
         # Get text embeddings of class dataset
-        # text_embeddings = self.embeddings.text_embeds
-        # text_embeddings = self.embeddings
         text_embeddings = self.text_embeddings
 
         # Generate query text embeddings
@@ -128,7 +126,6 @@ class CLIPEmbeddingsModel:
 
         # Compute cosine similarity between query text and all text embeddings
         similarities = cosine_similarity(query_text_embedding, text_embeddings, dim=1)
-        logger.info(f"Similarity scores: {similarities}")
 
         # Find the index of the maximum similarity score
         max_similarity_index = torch.argmax(similarities).item()
@@ -167,10 +164,14 @@ class CLIPEmbeddingsModel:
     def search_similar_images_top_3(self, query):
         # text_embeddings = self.embeddings["text_embeds"]
         text_embeddings = self.text_embeddings
-        logger.info(f"Text embeddings {text_embeddings.shape}")
 
         # Generate query text embeddings
-        query_text_embedding = self.process_and_embedd_query_text(query)
+        model = self.text_embedder
+
+        query_text_embedding = text_to_embedding_transformer(query, model)
+
+        logger.info(f"Query text embedding shape: {query_text_embedding.shape}")
+        logger.info(f"Text embeddings shape: {text_embeddings.shape}")
 
         # Compute cosine similarity between query text and all text embeddings
         similarities = cosine_similarity(query_text_embedding, text_embeddings, dim=1)
@@ -180,14 +181,12 @@ class CLIPEmbeddingsModel:
 
         logger.info(f"Top 3 Similarity scores: {indices}")
 
-        # Find the index of the maximum similarity score
-        max_similarity_index = torch.argmax(similarities).item()
-        max_similarity = similarities[max_similarity_index].item()
-
-        logger.info(f"Max similarity score: {max_similarity} at index: {max_similarity_index}")
-
         # Display the most similar image
-        self.__display_similar_image(self.images[max_similarity_index])
+        # dispolay top 3 images
+        for i in range(3):
+            max_similarity_index = indices.indices[i].item()
+            logger.info(f"Max similarity index: {max_similarity_index}")
+            self.__display_similar_image(self.images[max_similarity_index])
 
     def search_similar_image_revisited(self, query):
         # Get text embeddings of class dataset
