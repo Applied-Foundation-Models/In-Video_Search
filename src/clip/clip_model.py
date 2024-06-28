@@ -79,7 +79,11 @@ class CLIPEmbeddingsModel:
         logger.info(f"Embeddings: {self.embeddings}")
         return outputs
 
-
+    def generate_dataset_embeddings_standard_tokenizer(self, text):
+        model = self.text_embedder
+        query_text_embedding = text_to_embedding_transformer(text, model)
+        self.text_embeddings = query_text_embedding
+        logger.info(f"Text embeddings with standard tokenizer: {self.text_embeddings}")
 
     def generate_image_embeddings(self, text_transcription, image):
         inputs = self.processor(
@@ -116,7 +120,7 @@ class CLIPEmbeddingsModel:
         text_embeddings = self.text_embeddings
 
         # Generate query text embeddings
-        #query_text_embedding = self.process_and_embedd_query_text(query)
+        # query_text_embedding = self.process_and_embedd_query_text(query)
         model = self.text_embedder
 
         query_text_embedding = text_to_embedding_transformer(query, model)
@@ -161,7 +165,7 @@ class CLIPEmbeddingsModel:
         plt.axis('off')  # Hide axis
         plt.show()
 
-    def search_similar_images_top_3(self, query):
+    def search_similar_images_top_3(self, query, gt):
         # text_embeddings = self.embeddings["text_embeds"]
         text_embeddings = self.text_embeddings
 
@@ -179,7 +183,7 @@ class CLIPEmbeddingsModel:
 
         indices = torch.topk(similarities, 3)
 
-        logger.info(f"Top 3 Similarity scores: {indices}")
+        logger.info(f"Top 3 Similarity scores: {indices} - GT: {gt}")
 
         # Display the most similar image
         # dispolay top 3 images
