@@ -188,8 +188,11 @@ class CLIPEmbeddingsModel:
             if max_similarity_index <= len(self.img_paths):
                 logger.info(f"#####GT is keyframe number {gt}#####")
                 logger.info(f"Max similarity for index {max_similarity_index} is the keyframe {self.img_paths[max_similarity_index]}")
+
+                # Can display the image since paths are faulty 'magic-rabbit'
                 #opened_image = Image.open(self.img_paths[max_similarity_index])
                 #self.__display_similar_image(opened_image)
+                pass
             else:
                 logger.info(f"Index {max_similarity_index} is out of range")
 
