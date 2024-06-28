@@ -1,6 +1,8 @@
 from src.ocr.pytesseract_image_to_text import extract_text_from_image
 from src.clip.image_utils import load_images_from_path, generate_image_metadata
+from src.text_embedder.embedder import text_to_embedding_transformer
 from transformers import CLIPModel, CLIPProcessor
+from sentence_transformers import SentenceTransformer
 from loguru import logger
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -16,10 +18,12 @@ class CLIPEmbeddingsModel:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = CLIPModel.from_pretrained(model_name)
         self.processor = CLIPProcessor.from_pretrained(model_name)
+        self.text_embedder = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
         self.fig = plt.figure(figsize=(8, 20))
         self.dataset = None
         self.images = None
         self.embeddings = None
+        self.text_embeddings = None
         self.metadata = None
         self.img_paths = None
 
@@ -75,6 +79,8 @@ class CLIPEmbeddingsModel:
         logger.info(f"Embeddings: {self.embeddings}")
         return outputs
 
+
+
     def generate_image_embeddings(self, text_transcription, image):
         inputs = self.processor(
             text=text_transcription,
@@ -112,7 +118,10 @@ class CLIPEmbeddingsModel:
         text_embeddings = self.text_embeddings
 
         # Generate query text embeddings
-        query_text_embedding = self.process_and_embedd_query_text(query)
+        #query_text_embedding = self.process_and_embedd_query_text(query)
+        model = self.text_embedder
+
+        query_text_embedding = text_to_embedding_transformer(query, model)
 
         logger.info(f"Query text embedding shape: {query_text_embedding.shape}")
         logger.info(f"Text embeddings shape: {text_embeddings.shape}")
@@ -155,7 +164,7 @@ class CLIPEmbeddingsModel:
         plt.axis('off')  # Hide axis
         plt.show()
 
-    def search_similar_images(self, query):
+    def search_similar_images_top_3(self, query):
         # text_embeddings = self.embeddings["text_embeds"]
         text_embeddings = self.text_embeddings
         logger.info(f"Text embeddings {text_embeddings.shape}")
@@ -200,60 +209,3 @@ class CLIPEmbeddingsModel:
         # get image path
         image_path = self.img_paths[max_similarity_index]
         logger.info(f"Image path: {image_path}")
-
-
-# main function to test the class
-if __name__ == "__main__":
-    clip_model = CLIPEmbeddingsModel()
-
-    base_dir = os.path.dirname(os.path.abspath("../"))
-
-    # Made sure to only take keyframes with short text content
-    relative_image_path_1 = os.path.join(base_dir, 'data', 'raw', 'biology_chapter_3_3', 'extracted_keyframes',
-                                         'biology_chapter_3_3-Scene-039-01.jpg')
-    relative_image_path_2 = os.path.join(base_dir, 'data', 'raw', 'biology_chapter_3_3', 'extracted_keyframes',
-                                         'biology_chapter_3_3-Scene-097-01.jpg')
-    relative_image_path_3 = os.path.join(base_dir, 'data', 'raw', 'biology_chapter_3_3', 'extracted_keyframes',
-                                         'biology_chapter_3_3-Scene-014-01.jpg')
-
-    image_paths = [relative_image_path_1, relative_image_path_2, relative_image_path_3]
-
-    image_dataset = clip_model.load_and_process_dataset(image_paths)
-
-    logger.info(f"Image_dataset: {image_dataset}")
-
-    # from src.ocr.pytesseract_image_to_text import extract_text_from_image
-
-    # Generate OCR Captions
-
-    ocr_extracted_text = []
-    for path in image_paths:
-        extract_text_from_image(path)
-        ocr_extracted_text.append(extract_text_from_image(path))
-        logger.info(f"OCR_results: {ocr_extracted_text}")
-
-    # Generate embeddings
-
-    outputs = clip_model.generate_dataset_embeddings(ocr_extracted_text)
-
-    # ----
-    clip_model.generate_dataset_metadata(image_paths)
-
-    clip_model.store_dataset_locally(clip_model.metadata, clip_model.embeddings)
-    # ----
-
-    # TEST 1: Search for exact similar Text. First, load Test Keyframe Image
-    test_image_path = os.path.join(base_dir, 'data', 'raw', 'biology_chapter_3_3', 'extracted_keyframes',
-                                   'biology_chapter_3_3-Scene-097-01.jpg')
-
-    test_text_description = extract_text_from_image(test_image_path)
-
-    # Search for similar images in database
-    clip_model.search_similar_images(test_text_description)
-
-    # TEST 2: Search for similar images with query text
-    query_text = "plasma membrane and stuff going on"
-
-    clip_model.search_similar_images(query_text)
-
-    # ----------

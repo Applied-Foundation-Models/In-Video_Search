@@ -5184,6 +5184,31 @@ objc = ["pyobjc-framework-Cocoa"]
 win32 = ["pywin32"]
 
 [[package]]
+name = "sentence-transformers"
+version = "3.0.1"
+description = "Multilingual text embeddings"
+optional = false
+python-versions = ">=3.8.0"
+files = [
+    {file = "sentence_transformers-3.0.1-py3-none-any.whl", hash = "sha256:01050cc4053c49b9f5b78f6980b5a72db3fd3a0abb9169b1792ac83875505ee6"},
+    {file = "sentence_transformers-3.0.1.tar.gz", hash = "sha256:8a3d2c537cc4d1014ccc20ac92be3d6135420a3bc60ae29a3a8a9b4bb35fbff6"},
+]
+
+[package.dependencies]
+huggingface-hub = ">=0.15.1"
+numpy = "*"
+Pillow = "*"
+scikit-learn = "*"
+scipy = "*"
+torch = ">=1.11.0"
+tqdm = "*"
+transformers = ">=4.34.0,<5.0.0"
+
+[package.extras]
+dev = ["accelerate (>=0.20.3)", "datasets", "pre-commit", "pytest", "ruff (>=0.3.0)"]
+train = ["accelerate (>=0.20.3)", "datasets"]
+
+[[package]]
 name = "sentencepiece"
 version = "0.2.0"
 description = "SentencePiece python wrapper"
@@ -6480,4 +6505,4 @@ use-hdbscan = ["hdbscan"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "7c9ac26acb7676131635e3fdfe15185398db260b91af11f8316038a5a1b9bb6b"
+content-hash = "4afd22b6c9fd8bb790bca6d5e5375209382cdc9018688bd73ed79a28e75613e8"
