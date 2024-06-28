@@ -192,7 +192,7 @@ class CLIPEmbeddingsModel:
         logger.info(f"Top 3 Similarity scores: {indices} - GT is keyframe number {gt}")
 
         logger.info(f"Length of img paths: {len(self.img_paths)}")
-
+        res = {}
         for i in range(3):
             max_similarity_index = indices.indices[i].item()
             # print len of img paths
@@ -200,13 +200,16 @@ class CLIPEmbeddingsModel:
                 logger.info(f"#####GT is keyframe number {gt}#####")
                 logger.info(
                     f"Max similarity for index {max_similarity_index} is the keyframe {self.img_paths[max_similarity_index]}")
-
+                # append to dictionary
+                res.append(self.img_paths[max_similarity_index])
                 # Can display the image since paths are faulty 'magic-rabbit'
                 # opened_image = Image.open(self.img_paths[max_similarity_index])
                 # self.__display_similar_image(opened_image)
                 pass
             else:
                 logger.info(f"Index {max_similarity_index} is out of range")
+
+        return res
 
     def search_similar_images_top_3_clip(self, query, gt):
         # text_embeddings = self.embeddings["text_embeds"]
