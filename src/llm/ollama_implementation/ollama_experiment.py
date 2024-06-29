@@ -99,7 +99,7 @@ def prompt_llm_summary(slide_content, transcription, llava_output):
         data = json.loads(response_text)
         actual_response = data["response"]
         conversation_history.append(actual_response)
-        return actual_response
+        return extract_json(actual_response)
     else:
         print("Error:", response.status_code, response.text)
         return None
@@ -182,7 +182,7 @@ def prompt_llm_extensive_summary(slide_content, transcription, llava_output):
         data = json.loads(response_text)
         actual_response = data["response"]
         conversation_history.append(actual_response)
-        return actual_response
+        return extract_json(actual_response)
     else:
         print("Error:", response.status_code, response.text)
         return None
@@ -197,10 +197,14 @@ def extract_json(text):
         try:
             # Try to parse the JSON string to ensure it's valid
             json_obj = json.loads(json_str)
-            return json_obj
+            #Gets summary from json obj
+            print(json_obj)
+            return json_obj['Summary']
         except json.JSONDecodeError:
+            print('error json...')
             return None
     else:
+        print('none...')
         return None
     
 
