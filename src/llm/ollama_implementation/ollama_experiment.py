@@ -198,7 +198,6 @@ def extract_json(text):
             # Try to parse the JSON string to ensure it's valid
             json_obj = json.loads(json_str)
             #Gets summary from json obj
-            print(json_obj)
             return json_obj['Summary']
         except json.JSONDecodeError:
             print('error json...')
