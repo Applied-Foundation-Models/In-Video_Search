@@ -38,15 +38,15 @@ sentencepiece = "^0.2.0"
 peft = "^0.11.1"
 nltk = "^3.8.1"
 ollama = "^0.2.0"
-ffmpeg-python = "^0.2.0"
 loguru = "^0.7.2"
 av = "^12.1.0"
 opencv-python-headless = "4.9.0.80"
 opencv-python = "4.9.0.80"
-ffmpeg = "^1.4"
 numpy = "<2.0.0"
 cv2-tools = "^2.4.0"
 sentence-transformers = "^3.0.1"
+ffmpeg = "^1.4"
+ffmpeg-python = "^0.2.0"
 
 
 [tool.poetry.extras]
