@@ -196,9 +196,9 @@ def extract_json(text):
                 return json_obj['summary']
             except Exception as e:
                 print('Exception', e)
-                return None
+                return ""
     else:
-        return None
+        return ""
     
 
 
