@@ -1,5 +1,6 @@
 import pickle
 
+import streamlit as st
 import torch
 
 
@@ -49,3 +50,15 @@ def query_video_data(dict, keyframe, key):
             f"No values found for key '{key}' in the embedding dictionary."
         )
     return extracted_datapoint
+
+
+def update_selection():
+    selected_result = st.session_state.selected_result
+    st.session_state.start_time = query_video_data(
+        st.session_state["data"], selected_result, "timestamps"
+    )[1]
+    st.session_state.keyframe_summary = query_video_data(
+        st.session_state["data"], selected_result, "llava_result"
+    )
+    # Rerun app
+    st.rerun()
