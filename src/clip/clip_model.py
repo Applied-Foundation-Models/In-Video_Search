@@ -210,3 +210,42 @@ class CLIPEmbeddingsModel:
                 logger.info(f"Index {max_similarity_index} is out of range")
 
         return result
+
+    def search_similar_images_top_10(self, query, gt):
+        # text_embeddings = self.embeddings["text_embeds"]
+        text_embeddings = self.text_embeddings
+
+        # Generate query text embeddings
+        model = self.text_embedder
+
+        query_text_embedding = text_to_embedding_transformer(query, model)
+
+        logger.info(f"Query text embedding shape: {query_text_embedding.shape}")
+        logger.info(f"Text embeddings shape: {text_embeddings.shape}")
+
+        # Compute cosine similarity between query text and all text embeddings
+        similarities = cosine_similarity(query_text_embedding, text_embeddings, dim=1)
+
+        indices = torch.topk(similarities, 3)
+
+        logger.info(f"Top 3 Similarity scores: {indices} - GT is keyframe number {gt}")
+
+        logger.info(f"Length of img paths: {len(self.img_paths)}")
+
+        result = []
+
+        for i in range(10):
+            max_similarity_index = indices.indices[i].item()
+            # print len of img paths
+            if max_similarity_index <= len(self.img_paths):
+                logger.info(f"#####GT is keyframe number {gt}#####")
+                logger.info(
+                    f"Max similarity for index {max_similarity_index} is the keyframe {self.img_paths[max_similarity_index]}")
+                result.append(self.img_paths[max_similarity_index])
+                # Can display the image since paths are faulty 'magic-rabbit'
+                # opened_image = Image.open(self.img_paths[max_similarity_index])
+                # self.__display_similar_image(opened_image)
+            else:
+                logger.info(f"Index {max_similarity_index} is out of range")
+
+        return result
