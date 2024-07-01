@@ -59,21 +59,11 @@ def prompt_llm_summary(slide_content, transcription, llava_output):
     the slides in and summarize the key topics spoken by the lecturer, highlighting the most important ideas and concepts. You can only include keyphrases/ important words. Do not give individual summaries of each transcription, llava output, and slide content.
     The output should only contain the summary and no other text. Output should strictly be in JSON Format and no other format where key is the summary and value is the output.
 
-    For example:
-    ### Slide Content: Nutrients: Micronutrients - Vitamins: organic substances — Usually function as coenzymes - Help to speed up body’s chemical reactions — Only vitamin D can be synthesized in the body
-    - Sunlight required - Supplementation in areas of low sunlight — Other vitamins are supplied by foods
-
-    ### Transcription: Vitaminins are first type of micronutrient, organic substances, most of which the body cannot synthesize on its own.  Once in the body, most vitamins function as what's called a co-enzyme.
-    A co-enzyme is a molecule that helps enzymes and thus helps to speed up that enzymes work in completing a body's chemical reaction.  Vitamin deficiencies can affect every cell in the body because many different enzymes, all requiring the same vitamin, are involved in numerous bodily functions.
-    Vitaminins can even help protect the body against cancer and heart disease and even slows the aging process.  Vitamin D, which is also called calcetriol, is the only vitamin that ourselves and our body can synthesize on their own.
-    But there's a catch, sunlight is required for that process, so people living in climates with little sunlight can more easily develop a deficiency of vitamin D in those areas than those that live in places where there's plenty of sunlight.  Healthcare providers may recommend vitamin D supplements to these people.
-    You might also see that milk often comes supplemented with vitamin D.  All other vitamins then must be supplied by the foods that we eat.
-
-    ### LLAVA Output: The slide appears to be from an academic lecture discussing the topic of Microcronutrients.
-
-    ### Summary: Vitamins: essential micronutrients, coenzymes, speed reactions, only vitamin D synthesized with sunlight, deficiency impacts, supplements needed, diet source.
-
     There should be no other output except for the summary. Do not include " Here is your summary". 
+    There should be no other output except for the summary. Do not include " Here is your summary". 
+
+    Sample output:  Vitamins essential micronutrients, coenzymes, speed reactions, only vitamin D synthesized with sunlight, deficiency impacts, supplements needed, diet source.
+    There should be no other output except for the summary. Do not include " Here is your summary".
 
     Sample output:  Vitamins essential micronutrients, coenzymes, speed reactions, only vitamin D synthesized with sunlight, deficiency impacts, supplements needed, diet source.
     """
@@ -99,7 +89,7 @@ def prompt_llm_summary(slide_content, transcription, llava_output):
         data = json.loads(response_text)
         actual_response = data["response"]
         conversation_history.append(actual_response)
-        return actual_response
+        return extract_json(actual_response)
     else:
         print("Error:", response.status_code, response.text)
         return None
@@ -182,7 +172,7 @@ def prompt_llm_extensive_summary(slide_content, transcription, llava_output):
         data = json.loads(response_text)
         actual_response = data["response"]
         conversation_history.append(actual_response)
-        return actual_response
+        return extract_json(actual_response)
     else:
         print("Error:", response.status_code, response.text)
         return None
@@ -197,9 +187,16 @@ def extract_json(text):
         try:
             # Try to parse the JSON string to ensure it's valid
             json_obj = json.loads(json_str)
-            return json_obj
-        except json.JSONDecodeError:
-            return None
+            #Gets summary from json obj
+            return json_obj['Summary']
+        
+        except Exception as e:
+            print('Exception', e)
+            try:
+                return json_obj['summary']
+            except Exception as e:
+                print('Exception', e)
+                return None
     else:
         return None
     

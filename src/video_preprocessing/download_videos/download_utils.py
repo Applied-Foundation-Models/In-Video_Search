@@ -416,6 +416,13 @@ def create_metadata(
     extensive_summary,
     clip_text_embedding,
     clip_image_embedding,
+    standard_text_embedding,
+    extensive_text_embedding,
+    ocr_text_embedding,
+    transcription_text_embedding,
+    llava_text_embedding,
+    ocr_transcription_embedding,
+    ocr_transcription_llava_embedding
 ):
     video_metadata = {
         "img_path": image_path,
@@ -427,7 +434,13 @@ def create_metadata(
         "llm_long_summary": extensive_summary,
         "clip_text_embedding": clip_text_embedding,
         "clip_image_embedding": clip_image_embedding,
-        "long_description_embedding": "",
+        "standard_text_embedding": standard_text_embedding,
+        "extensive_text_embedding": extensive_text_embedding,
+        "ocr_text_embedding" : ocr_text_embedding,
+        "transcription_text_embedding": transcription_text_embedding,
+        "llava_text_embedding" : llava_text_embedding,
+        "ocr_transcription_embedding" : ocr_transcription_embedding,
+        "ocr_transcription_llava_embedding" : ocr_transcription_llava_embedding
     }
 
     return keyframe_num, video_metadata
