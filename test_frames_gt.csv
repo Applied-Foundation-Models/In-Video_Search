@@ -1,6 +1,6 @@
 ID,Prompt,Length,GT_Keyframe
 1,learning outcomes,short,3
-2,retrieve the main learning outcomes from the lecture,long,3
+2,What are the learning outcomes from the lecture?,long,3
 3,explain proteins in macronutrients,short,27
 4,I did not understand the function of proteins in macronutrients,long,27
 5,fish oil capsules,short,30
