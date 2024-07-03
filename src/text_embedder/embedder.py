@@ -135,6 +135,26 @@ class EmbeddingsModel:
         plt.axis("off")  # Hide axis
         plt.show()
 
+    def check_proximity_keyframes(self, gt):
+        proximity_kf = []
+
+        # Define the boundaries for the image paths
+        max_index = len(self.img_paths) - 1
+
+        if gt == 0:
+            logger.info("No proximity - Invalid GT")
+        elif gt == 1:
+            proximity_kf.extend(range(1,5))
+        elif gt >= max_index:
+            proximity_kf.extend(range(max_index, max_index - 5, -1))
+        else:
+            proximity_kf.extend([gt - 2, gt - 1, gt, gt + 1, gt + 2])
+
+        # Ensure all indexes are within valid range
+        proximity_kf = [i for i in proximity_kf if 0 <= i <= max_index]
+
+        return proximity_kf
+
     def search_similar_images_top_k(self, query, gt, k: int):
         # text_embeddings = self.embeddings["text_embeds"]
         text_embeddings = self.text_embeddings
