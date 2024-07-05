@@ -1,6 +1,7 @@
 import os
 
 import streamlit as st
+from loguru import logger
 
 from app.app_helper import (
     get_file_mapping,
@@ -34,7 +35,12 @@ if "embedder" not in st.session_state:
 if "top_three_results" not in st.session_state:
     st.session_state.top_three_results = []
 
-
+if "video_url" not in st.session_state:
+    st.session_state.video_url = (
+        "data/raw/biology_chapter_3_3_treshhold_5/biology_chapter_3_3_treshhold_5.mp4"
+    )
+if "keyframe_summary" not in st.session_state:
+    st.session_state.keyframe_summary = ""
 # Print the current path
 
 
@@ -61,22 +67,19 @@ selected_option = st.selectbox("Select a Lecture to study:", options)
 
 if selected_option:
     file_mapping = get_file_mapping()
-    file_name = file_mapping[selected_option]
-    st.session_state["data"] = load_pickle(os.path.join(project_path, file_name))
+    pickle_file = file_mapping[selected_option]["pickle_file"]
+    video_url = file_mapping[selected_option]["video_url"]
+    st.session_state["data"] = load_pickle(os.path.join(project_path, pickle_file))
     st.session_state.embedder.text_embeddings = load_embeddings(
         st.session_state["data"], "clip_text_embedding"
     )
+    # Set session state variable for video url to be used in video player:
+    st.session_state["video_url"] = os.path.join(project_path, video_url)
 
-
-# Display data if available in session state
-if st.session_state["data"] is not None:
-    # st.write(st.session_state["data"])
-    st.write("Lecture loaded successfully!")
-
-st.header("Video Search:")
+st.header(f"Recap Lecture: {selected_option}")
 
 st.video(
-    "/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/biology_chapter_3_3_treshhold_5/biology_chapter_3_3_treshhold_5.mp4",
+    st.session_state.video_url,
     start_time=st.session_state.start_time,
 )
 st.markdown(
@@ -123,12 +126,14 @@ col1, col2 = st.columns([0.2, 0.8])
 
 # Replace table with selectbox for top three results
 if st.session_state.top_three_results:
+    logger.info("Updating selection:")
     selected_result = col1.selectbox(
         "Select a result",
         st.session_state.top_three_results,
         key="selected_result",
         on_change=update_selection,
     )
+    logger.info(f"Selected result: {selected_result}")
 
     # Display selected keyframe summary in text area in col2
     col2.text_area(
