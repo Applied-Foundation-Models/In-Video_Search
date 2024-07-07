@@ -2,14 +2,24 @@ import pickle
 
 import streamlit as st
 import torch
+from loguru import logger
 
 
 # Function to return the file mapping
 def get_file_mapping():
     return {
-        "Biology 1": "bio_3_3_th5.pickle",
-        "Biology 3": "biology3.pkl",
-        "ML - 1": "ml1.pkl",
+        "Biology 1": {
+            "pickle_file": "biology_chapter_3_3_treshhold_5.pickle",
+            "video_url": "data/raw/biology_chapter_3_3_treshhold_5/biology_chapter_3_3_treshhold_5.mp4",
+        },
+        "Biology 2": {
+            "pickle_file": "ch7_soil_agriculture.pickle",
+            "video_url": "data/raw/ch7_soil_agriculture/ch7_soil_agriculture.mp4",
+        },
+        "Math 1": {
+            "pickle_file": "math_1.pickle",
+            "video_url": "data/raw/math_1/math_1.mp4",
+        },
     }
 
 
@@ -40,9 +50,6 @@ def load_embeddings(embedding_dict, key):
 
 def query_video_data(dict, keyframe, key):
     # Extract values associated with the key
-    print(dict)
-    print(key)
-    print(keyframe)
     try:
         extracted_datapoint = dict[keyframe][key]
     except KeyError:
@@ -54,11 +61,14 @@ def query_video_data(dict, keyframe, key):
 
 def update_selection():
     selected_result = st.session_state.selected_result
+    logger.info("Querying data for selected result")
     st.session_state.start_time = query_video_data(
         st.session_state["data"], selected_result, "timestamps"
     )[1]
+    logger.info("Timestamp querying - DONE")
     st.session_state.keyframe_summary = query_video_data(
         st.session_state["data"], selected_result, "llava_result"
     )
+    logger.info("Video querying - DONE")
     # Rerun app
     st.rerun()

@@ -81,7 +81,7 @@ class EmbeddingsModel:
 
         # Compute cosine similarity between query text and all text embeddings
         similarities = cosine_similarity(query_text_embedding, text_embeddings, dim=1)
-
+        logger.info(f"Similarities done: {similarities}")
         # Find the index of the maximum similarity score
         max_similarity_index = torch.argmax(similarities).item()
         max_similarity = similarities[max_similarity_index].item()
