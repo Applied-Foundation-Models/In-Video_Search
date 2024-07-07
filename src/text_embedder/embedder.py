@@ -144,7 +144,7 @@ class EmbeddingsModel:
         if gt == 0:
             logger.info("No proximity - Invalid GT")
         elif gt == 1:
-            proximity_kf.extend(range(1,5))
+            proximity_kf.extend(range(1, 5))
         elif gt >= max_index:
             proximity_kf.extend(range(max_index, max_index - 5, -1))
         else:
