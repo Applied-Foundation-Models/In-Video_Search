@@ -135,25 +135,7 @@ class EmbeddingsModel:
         plt.axis("off")  # Hide axis
         plt.show()
 
-    def check_proximity_keyframes(self, gt):
-        proximity_kf = []
 
-        # Define the boundaries for the image paths
-        max_index = len(self.img_paths) - 1
-
-        if gt == 0:
-            logger.info("No proximity - Invalid GT")
-        elif gt == 1:
-            proximity_kf.extend(range(1, 5))
-        elif gt >= max_index:
-            proximity_kf.extend(range(max_index, max_index - 5, -1))
-        else:
-            proximity_kf.extend([gt - 2, gt - 1, gt, gt + 1, gt + 2])
-
-        # Ensure all indexes are within valid range
-        proximity_kf = [i for i in proximity_kf if 0 <= i <= max_index]
-
-        return proximity_kf
 
     def search_similar_images_top_k(self, query, gt, k: int):
         # text_embeddings = self.embeddings["text_embeds"]
@@ -164,8 +146,8 @@ class EmbeddingsModel:
 
         query_text_embedding = text_to_embedding_transformer(query, model)
 
-        logger.info(f"Query text embedding shape: {query_text_embedding.shape}")
-        logger.info(f"Text embeddings shape: {text_embeddings.shape}")
+        #logger.info(f"Query text embedding shape: {query_text_embedding.shape}")
+        #logger.info(f"Text embeddings shape: {text_embeddings.shape}")
 
         # Compute cosine similarity between query text and all text embeddings
         similarities = cosine_similarity(query_text_embedding, text_embeddings, dim=1)
