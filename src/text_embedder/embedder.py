@@ -135,6 +135,8 @@ class EmbeddingsModel:
         plt.axis("off")  # Hide axis
         plt.show()
 
+
+
     def search_similar_images_top_k(self, query, gt, k: int):
         # text_embeddings = self.embeddings["text_embeds"]
         text_embeddings = self.text_embeddings
@@ -144,8 +146,8 @@ class EmbeddingsModel:
 
         query_text_embedding = text_to_embedding_transformer(query, model)
 
-        logger.info(f"Query text embedding shape: {query_text_embedding.shape}")
-        logger.info(f"Text embeddings shape: {text_embeddings.shape}")
+        #logger.info(f"Query text embedding shape: {query_text_embedding.shape}")
+        #logger.info(f"Text embeddings shape: {text_embeddings.shape}")
 
         # Compute cosine similarity between query text and all text embeddings
         similarities = cosine_similarity(query_text_embedding, text_embeddings, dim=1)
