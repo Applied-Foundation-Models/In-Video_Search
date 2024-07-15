@@ -42,10 +42,14 @@ def load_embeddings(embedding_dict, key):
             f"No values found for key '{key}' in the embedding dictionary."
         )
 
-    # Concatenate values into a single tensor
+    # Concatenate the value
     concatenated_tensor = torch.cat(values, dim=0)
+    # Calculate k (number of embeddings)
+    k = len(values)
+    # Reshape the concatenated tensor to [k, 384]
+    reshaped_tensor = concatenated_tensor.view(k, 384)
 
-    return concatenated_tensor
+    return reshaped_tensor
 
 
 def query_video_data(dict, keyframe, key):

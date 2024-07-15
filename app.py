@@ -71,10 +71,11 @@ if selected_option:
     video_url = file_mapping[selected_option]["video_url"]
     st.session_state["data"] = load_pickle(os.path.join(project_path, pickle_file))
     st.session_state.embedder.text_embeddings = load_embeddings(
-        st.session_state["data"], "clip_text_embedding"
+        st.session_state["data"], "extensive_text_embedding"
     )
     # Set session state variable for video url to be used in video player:
     st.session_state["video_url"] = os.path.join(project_path, video_url)
+    st.session_state["start_time"] = 0
 
 st.header(f"Recap Lecture: {selected_option}")
 

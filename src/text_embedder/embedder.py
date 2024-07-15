@@ -67,9 +67,9 @@ class EmbeddingsModel:
 
         query_text_embedding = text_to_embedding_transformer(query, model)
         # Add padding to query_text_embedding to make them even to 512:
-        query_text_embedding = torch.nn.functional.pad(
-            query_text_embedding, (0, 512 - query_text_embedding.shape[0])
-        )
+        # query_text_embedding = torch.nn.functional.pad(
+        #     query_text_embedding, (0, 512 - query_text_embedding.shape[0])
+        # )
 
         print(f"Query:{query_text_embedding}")
 
@@ -94,29 +94,14 @@ class EmbeddingsModel:
         return similarities
 
     def retreive_top_3_similar_images(self, query):
-        device = get_device()
+        # device = get_device()
 
         # Ensure text_embeddings is moved to the correct device
-        text_embeddings = self.text_embeddings.to(device)
-        # Get text embeddings of class dataset
+        text_embeddings = self.text_embeddings
 
-        # Generate query text embeddings
-        # query_text_embedding = self.process_and_embedd_query_text(query)
         model = self.text_embedder
 
         query_text_embedding = text_to_embedding_transformer(query, model)
-        # Add padding to query_text_embedding to make them even to 512:
-        query_text_embedding = torch.nn.functional.pad(
-            query_text_embedding, (0, 512 - query_text_embedding.shape[0])
-        )
-
-        print(f"Query:{query_text_embedding}")
-
-        logger.info(f"Query text embedding shape: {query_text_embedding.shape}")
-        logger.info(f"Text embeddings shape: {text_embeddings.shape}")
-
-        logger.info(f"Device of query_text_embedding: {query_text_embedding.device}")
-        logger.info(f"Device of text_embeddings: {text_embeddings.device}")
 
         # Compute cosine similarity between query text and all text embeddings
         similarities = cosine_similarity(query_text_embedding, text_embeddings, dim=1)
@@ -135,8 +120,6 @@ class EmbeddingsModel:
         plt.axis("off")  # Hide axis
         plt.show()
 
-
-
     def search_similar_images_top_k(self, query, gt, k: int):
         # text_embeddings = self.embeddings["text_embeds"]
         text_embeddings = self.text_embeddings
@@ -145,9 +128,6 @@ class EmbeddingsModel:
         model = self.text_embedder
 
         query_text_embedding = text_to_embedding_transformer(query, model)
-
-        #logger.info(f"Query text embedding shape: {query_text_embedding.shape}")
-        #logger.info(f"Text embeddings shape: {text_embeddings.shape}")
 
         # Compute cosine similarity between query text and all text embeddings
         similarities = cosine_similarity(query_text_embedding, text_embeddings, dim=1)
