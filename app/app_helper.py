@@ -30,26 +30,34 @@ def load_pickle(file_name):
     return data
 
 
-def load_embeddings(embedding_dict, key):
-    # Extract values associated with the key
-    values = [
-        embedding_dict[k][key] for k in embedding_dict if key in embedding_dict[k]
-    ]
+def create_tensor_and_mapping(embedding_dict, key):
+    # Initialize a list to store the embeddings and a dictionary to store the mapping
+    embeddings = []
+    key_to_index_mapping = {}
+    # Iterate through the embedding dictionary
+    for idx, k in enumerate(sorted(embedding_dict.keys())):
+        if key in embedding_dict[k]:
+            # Append the embedding to the list
+            embeddings.append(embedding_dict[k][key])
+            # Store the mapping from the original key to the index
+            key_to_index_mapping[k] = idx
 
-    # Check if there are values to concatenate
-    if not values:
+    # Check if there are embeddings to concatenate
+    if not embeddings:
         raise ValueError(
             f"No values found for key '{key}' in the embedding dictionary."
         )
 
-    # Concatenate the value
-    concatenated_tensor = torch.cat(values, dim=0)
-    # Calculate k (number of embeddings)
-    k = len(values)
-    # Reshape the concatenated tensor to [k, 384]
-    reshaped_tensor = concatenated_tensor.view(k, 384)
+    # Concatenate the embeddings into a single tensor
+    concatenated_tensor = torch.cat(embeddings, dim=0)
 
-    return reshaped_tensor
+    # Calculate the number of embeddings
+    k = len(embeddings)
+
+    # Reshape the concatenated tensor to [k, embedding_length]
+    reshaped_tensor = concatenated_tensor.view(k, -1)
+
+    return reshaped_tensor, key_to_index_mapping
 
 
 def query_video_data(dict, keyframe, key):
@@ -76,3 +84,13 @@ def update_selection():
     logger.info("Video querying - DONE")
     # Rerun app
     st.rerun()
+
+
+def retrieve_keys_from_indices(list_retrieval, key_to_index_mapping):
+    # Create a reverse mapping from index to key
+    index_to_key_mapping = {v: k for k, v in key_to_index_mapping.items()}
+
+    # Retrieve the keys corresponding to the indices in list_retrieval
+    keys_retrieved = [index_to_key_mapping[idx] for idx in list_retrieval]
+
+    return keys_retrieved

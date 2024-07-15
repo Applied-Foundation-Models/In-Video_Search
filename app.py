@@ -4,9 +4,10 @@ import streamlit as st
 from loguru import logger
 
 from app.app_helper import (
+    create_tensor_and_mapping,
     get_file_mapping,
-    load_embeddings,
     load_pickle,
+    retrieve_keys_from_indices,
     update_selection,
 )
 from src.text_embedder.embedder import EmbeddingsModel
@@ -42,6 +43,8 @@ if "video_url" not in st.session_state:
 if "keyframe_summary" not in st.session_state:
     st.session_state.keyframe_summary = ""
 # Print the current path
+if "mapping" not in st.session_state:
+    st.session_state.mapping = {}
 
 
 st.title("Welcome to Video Summarization!")
@@ -70,12 +73,12 @@ if selected_option:
     pickle_file = file_mapping[selected_option]["pickle_file"]
     video_url = file_mapping[selected_option]["video_url"]
     st.session_state["data"] = load_pickle(os.path.join(project_path, pickle_file))
-    st.session_state.embedder.text_embeddings = load_embeddings(
-        st.session_state["data"], "extensive_text_embedding"
+    st.session_state.embedder.text_embeddings, st.session_state.mapping = (
+        create_tensor_and_mapping(st.session_state["data"], "extensive_text_embedding")
     )
     # Set session state variable for video url to be used in video player:
     st.session_state["video_url"] = os.path.join(project_path, video_url)
-    st.session_state["start_time"] = 0
+
 
 st.header(f"Recap Lecture: {selected_option}")
 
@@ -112,9 +115,14 @@ with button_col:
     st.markdown("</div>", unsafe_allow_html=True)
 
 if search_button_pressed:
-    top_three_results = st.session_state.embedder.retreive_top_3_similar_images(
+    top_three_results_index = st.session_state.embedder.retreive_top_3_similar_images(
         st.session_state.prompt
     )
+    top_three_results = retrieve_keys_from_indices(
+        top_three_results_index, st.session_state.mapping
+    )
+    print(f"Top three results: {top_three_results}")
+    # Map the three results to the corresponding keys: (we need to iterate over the values and find the corresponding key frma the value )
 
     st.session_state.top_three_results = top_three_results
     st.session_state.selected_result = top_three_results[
