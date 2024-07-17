@@ -6,6 +6,15 @@ from transformers import BartForConditionalGeneration, BartTokenizer
 
 
 def summarize(text):
+    """
+    Summarizes the given text using the BART model.
+
+    Args:
+        text (str): The input text to be summarized.
+
+    Returns:
+        str: The generated summary of the input text.
+    """
     tokenizer = BartTokenizer.from_pretrained("facebook/bart-large-cnn")
     model = BartForConditionalGeneration.from_pretrained("facebook/bart-large-cnn")
 

@@ -1,15 +1,18 @@
 import argparse
 import base64
 import json
-from io import BytesIO
 import re
+from io import BytesIO
+
 import requests
 from PIL import Image
 
 """
 the following relies on ollama which can be used to run LLMs locally it is optimized for usage on Apple MPS
 
-downlaod and install here: https://www.ollama.com/
+Download and install here: https://www.ollama.com/
+
+Furthermore you need to download the llama3 and llava model in order to create the embeddings
 """
 
 
@@ -59,8 +62,8 @@ def prompt_llm_summary(slide_content, transcription, llava_output):
     the slides in and summarize the key topics spoken by the lecturer, highlighting the most important ideas and concepts. You can only include keyphrases/ important words. Do not give individual summaries of each transcription, llava output, and slide content.
     The output should only contain the summary and no other text. Output should strictly be in JSON Format and no other format where key is the summary and value is the output.
 
-    There should be no other output except for the summary. Do not include " Here is your summary". 
-    There should be no other output except for the summary. Do not include " Here is your summary". 
+    There should be no other output except for the summary. Do not include " Here is your summary".
+    There should be no other output except for the summary. Do not include " Here is your summary".
 
     Sample output:  Vitamins essential micronutrients, coenzymes, speed reactions, only vitamin D synthesized with sunlight, deficiency impacts, supplements needed, diet source.
     There should be no other output except for the summary. Do not include " Here is your summary".
@@ -146,7 +149,7 @@ def prompt_llm_extensive_summary(slide_content, transcription, llava_output):
 
     ### Summary: Vitamins: The lecture focused on micronutrients, specifically vitamins. Vitamins are organic substances that primarily function as coenzymes, aiding in the body's chemical reactions. Most vitamins cannot be synthesized by the body and must be obtained from food, except for Vitamin D, which requires sunlight for synthesis. In regions with low sunlight, Vitamin D deficiency is more common, and supplementation is often recommended. Vitamins are essential for numerous bodily functions and can protect against diseases and aging.
 
-    There should be no other output except for the summary. Do not include " Here is your summary". The key of JSON output should be "Summary" and value should be the generated output. 
+    There should be no other output except for the summary. Do not include " Here is your summary". The key of JSON output should be "Summary" and value should be the generated output.
 
     Sample output: The lecture focused on micronutrients, specifically vitamins. Vitamins are organic substances that primarily function as coenzymes, aiding in the body's chemical reactions. Most vitamins cannot be synthesized by the body and must be obtained from food, except for Vitamin D, which requires sunlight for synthesis. In regions with low sunlight, Vitamin D deficiency is more common, and supplementation is often recommended. Vitamins are essential for numerous bodily functions and can protect against diseases and aging.
     """
@@ -177,29 +180,29 @@ def prompt_llm_extensive_summary(slide_content, transcription, llava_output):
         print("Error:", response.status_code, response.text)
         return None
 
+
 def extract_json(text):
     # Regular expression to find a JSON object in a string
-    json_pattern = re.compile(r'(\{.*?\})', re.DOTALL)
+    json_pattern = re.compile(r"(\{.*?\})", re.DOTALL)
     match = json_pattern.search(text)
-    
+
     if match:
         json_str = match.group(1)
         try:
             # Try to parse the JSON string to ensure it's valid
             json_obj = json.loads(json_str)
-            #Gets summary from json obj
-            return json_obj['Summary']
-        
+            # Gets summary from json obj
+            return json_obj["Summary"]
+
         except Exception as e:
-            print('Exception', e)
+            print("Exception", e)
             try:
-                return json_obj['summary']
+                return json_obj["summary"]
             except Exception as e:
-                print('Exception', e)
+                print("Exception", e)
                 return ""
     else:
         return ""
-    
 
 
 def image_to_base64(image_path, format="JPEG"):

@@ -47,8 +47,6 @@ poetry lock                                 // only for the first execution
 
 poetry config virtualenvs.in-project true   // only for the first execution
 poetry install                              // only for the first execution
-
-streamlit run src/scripts/app/Startseite.py
 ```
 
 ### Installation Steps
@@ -137,3 +135,15 @@ python ollama_experiment.py --llava_captioning
 python ollama_experiment.py --prompt_llm_summary
 
 ```
+
+
+
+# Running the Streamlit Frontend
+
+To run the frontend, follow these steps:
+
+1. Ensure you have [Streamlit](https://streamlit.io/) installed. If not, you can install it using pip:
+   ```bash
+   pip install streamlit
+   streamlit run app.py
+  ```

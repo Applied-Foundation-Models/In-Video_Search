@@ -10,12 +10,11 @@ import subprocess
 from multiprocessing import Pool
 
 import pandas as pd
+import whisper
 from loguru import logger
 from moviepy.editor import VideoFileClip
 from pydub import AudioSegment
 from tqdm import tqdm
-
-import whisper
 
 # The rest of the functions remain unchanged
 
@@ -109,6 +108,15 @@ def split_by_manifest(
 
 
 def get_video_length(filename):
+    """
+    Get the length of a video file in seconds.
+
+    Args:
+        filename (str): The path to the video file.
+
+    Returns:
+        int: The length of the video in seconds.
+    """
     output = subprocess.check_output(
         (
             "ffprobe",
@@ -141,6 +149,25 @@ def split_by_seconds(
     video_length=None,
     **kwargs,
 ):
+    """
+    Split a video into segments of a specified length in seconds.
+
+    Args:
+        filename (str): The path to the video file.
+        split_length (int): The length of each segment in seconds.
+        output_dir (str): The directory where the segments will be saved.
+        vcodec (str, optional): The video codec for the ffmpeg video output. Defaults to "copy".
+        acodec (str, optional): The audio codec for the ffmpeg video output. Defaults to "copy".
+        extra (str, optional): Extra options for ffmpeg. Defaults to "".
+        video_length (int, optional): The length of the video in seconds. If not provided, it will be calculated.
+        **kwargs: Additional keyword arguments for video codec settings.
+
+    Raises:
+        SystemExit: If the split length is 0 or the video length is less than the target split length.
+
+    Returns:
+        None
+    """
     if split_length and split_length <= 0:
         logger.info("Split length can't be 0")
         raise SystemExit
@@ -149,7 +176,7 @@ def split_by_seconds(
         video_length = get_video_length(filename)
     split_count = ceildiv(video_length, split_length)
     if split_count == 1:
-        logger.info("Video length is less then the target split length.")
+        logger.info("Video length is less than the target split length.")
         raise SystemExit
 
     split_cmd = [
@@ -287,46 +314,21 @@ def extract_and_store_audio(video_dir, audio_dir):
         logger.info(f"Audio extracted and saved as {audio_path}")
 
 
-# Speed up using hugging_face-whisper: https://www.reddit.com/r/MachineLearning/comments/14xxg6i/d_what_is_the_most_efficient_version_of_openai/
-# def transcribe_audio_files(
-#     audio_dir, transcriptions_dir, model_type="small", lang="en"
-# ):
-#     """
-#     Transcribe each audio file in the audio_dir and save transcriptions to transcriptions_dir.
-#     """
-#     model = whisper.load_model(model_type)
-#     os.makedirs(transcriptions_dir, exist_ok=True)
-#     audio_files = [f for f in os.listdir(audio_dir) if f.endswith(".wav")]
-
-#     for audio_file in tqdm(audio_files):
-#         audio_path = os.path.join(audio_dir, audio_file)
-#         result = model.transcribe(audio_path, task="translate", language=lang)
-#         # Create Subtitle dataframe and save it
-#         dict1 = {"start": [], "end": [], "text": []}
-#         for segment in result["segments"]:
-#             dict1["start"].append(int(segment["start"]))
-#             dict1["end"].append(int(segment["end"]))
-#             dict1["text"].append(segment["text"])
-#         df = pd.DataFrame.from_dict(dict1)
-#         df.to_csv(os.path.join(transcriptions_dir, audio_file.replace(".wav", ".csv")))
-#         print(f"Transcription for {audio_file} saved in {transcriptions_dir}")
-#         audio_path = os.path.join(audio_dir, audio_file)
-#         result = model.transcribe(audio_path, task="translate", language=lang)
-
-#         # Create Subtitle dataframe and save it
-#         dict1 = {"start": [], "end": [], "text": []}
-#         for segment in result["segments"]:
-#             dict1["start"].append(int(segment["start"]))
-#             dict1["end"].append(int(segment["end"]))
-#             dict1["text"].append(segment["text"])
-
-#         df = pd.DataFrame.from_dict(dict1)
-#         df.to_csv(os.path.join(transcriptions_dir, audio_file.replace(".wav", ".csv")))
-
-#         print(f"Transcription for {audio_file} saved in {transcriptions_dir}")
-
-
 def transcribe_single_file(args):
+    """
+    Transcribes a single audio file using a specified model and saves the transcription as a CSV file.
+
+    Args:
+        args (tuple): A tuple containing the following elements:
+            - audio_dir (str): The directory path where the audio file is located.
+            - audio_file (str): The name of the audio file.
+            - transcriptions_dir (str): The directory path where the transcriptions will be saved.
+            - model_type (str): The type of the model to use for transcription.
+            - lang (str): The language of the audio file.
+
+    Returns:
+        None
+    """
     audio_dir, audio_file, transcriptions_dir, model_type, lang = args
     model = whisper.load_model(model_type)
     audio_path = os.path.join(audio_dir, audio_file)
@@ -349,6 +351,18 @@ def transcribe_single_file(args):
 def transcribe_audio_files(
     audio_dir, transcriptions_dir, model_type="small", lang="en"
 ):
+    """
+    Transcribes audio files in the given directory using a specified model.
+
+    Args:
+        audio_dir (str): The directory path containing the audio files to transcribe.
+        transcriptions_dir (str): The directory path to save the transcriptions.
+        model_type (str, optional): The type of model to use for transcription. Defaults to "small".
+        lang (str, optional): The language of the audio files. Defaults to "en".
+
+    Returns:
+        None
+    """
     os.makedirs(transcriptions_dir, exist_ok=True)
     audio_files = [f for f in os.listdir(audio_dir) if f.endswith(".wav")]
 
@@ -365,6 +379,17 @@ def transcribe_audio_files(
 
 
 def transcription_to_text(keyframe, transcription_file_path, timestamp_file_path):
+    """
+    Convert the transcription file and timestamp file into text and timestamps for a given keyframe.
+
+    Parameters:
+    keyframe (int): The keyframe for which the transcription and timestamps are required.
+    transcription_file_path (str): The file path of the transcription file.
+    timestamp_file_path (str): The file path of the timestamp file.
+
+    Returns:
+    tuple: A tuple containing the transcription (str) and the timestamps (dict) for the given keyframe.
+    """
     # Load the CSV file into a DataFrame
     df_timestamps = pd.read_csv(timestamp_file_path, skiprows=1)
 
@@ -378,31 +403,6 @@ def transcription_to_text(keyframe, transcription_file_path, timestamp_file_path
     else:
         transcription = ""
     return transcription, timestamps[keyframe]
-
-
-# def hugging_face_whisper():
-#     # device = "mps" if torch.backends.mps.is_available() else "cpu"
-#     device = "cpu"
-#     pipe = pipeline(
-#         "automatic-speech-recognition",
-#         model="openai/whisper-tiny",
-#         chunk_length_s=30,
-#         device=device,
-#     )
-#     ds = load_dataset(
-#         "hf-internal-testing/librispeech_asr_dummy", "clean", split="validation"
-#     )
-#     sample = ds[0]["audio"]
-#     logger.info(f"Sample:{sample}")
-#     filepath = "/Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/biology_chapter_3_3/audio_chunks/biology_chapter_3_3-Scene-001.wav"
-#     audio_data, sample_rate = sf.read(filepath)
-
-#     # Prepare the audio dictionary expected by the Whisper pipeline
-#     sample = {"array": audio_data, "sampling_rate": sample_rate}
-#     logger.info(f"WAV sample: {sample}")
-
-#     prediction = pipe(sample.copy(), batch_size=8, return_timestamps=True)["chunks"]
-#     logger.info(prediction)
 
 
 def create_metadata(
@@ -422,8 +422,33 @@ def create_metadata(
     transcription_text_embedding,
     llava_text_embedding,
     ocr_transcription_embedding,
-    ocr_transcription_llava_embedding
+    ocr_transcription_llava_embedding,
 ):
+    """
+    Create metadata for a video.
+
+    Args:
+        keyframe_num (int): The keyframe number.
+        image_path (str): The path to the image.
+        timestamps (list): List of timestamps.
+        transcription (str): The transcription of the video.
+        ocr_extracted_text (str): The extracted text from OCR.
+        llava_results (str): The LLAVA results.
+        clip_llm_summary (str): The summary of the clip.
+        extensive_summary (str): The extensive summary.
+        clip_text_embedding (str): The text embedding of the clip.
+        clip_image_embedding (str): The image embedding of the clip.
+        standard_text_embedding (str): The standard text embedding.
+        extensive_text_embedding (str): The extensive text embedding.
+        ocr_text_embedding (str): The text embedding from OCR.
+        transcription_text_embedding (str): The text embedding of the transcription.
+        llava_text_embedding (str): The text embedding of LLAVA.
+        ocr_transcription_embedding (str): The text embedding of OCR and transcription.
+        ocr_transcription_llava_embedding (str): The text embedding of OCR, transcription, and LLAVA.
+
+    Returns:
+        tuple: A tuple containing the keyframe number and video metadata.
+    """
     video_metadata = {
         "img_path": image_path,
         "timestamps": timestamps,
@@ -436,11 +461,11 @@ def create_metadata(
         "clip_image_embedding": clip_image_embedding,
         "standard_text_embedding": standard_text_embedding,
         "extensive_text_embedding": extensive_text_embedding,
-        "ocr_text_embedding" : ocr_text_embedding,
+        "ocr_text_embedding": ocr_text_embedding,
         "transcription_text_embedding": transcription_text_embedding,
-        "llava_text_embedding" : llava_text_embedding,
-        "ocr_transcription_embedding" : ocr_transcription_embedding,
-        "ocr_transcription_llava_embedding" : ocr_transcription_llava_embedding
+        "llava_text_embedding": llava_text_embedding,
+        "ocr_transcription_embedding": ocr_transcription_embedding,
+        "ocr_transcription_llava_embedding": ocr_transcription_llava_embedding,
     }
 
     return keyframe_num, video_metadata
@@ -485,6 +510,3 @@ if __name__ == "__main__":
         transcribe_audio_files(
             args.audio_dir, args.transcriptions_dir, args.model, args.lang
         )
-
-    # if args.run_hugging_face:
-    #     hugging_face_whisper()

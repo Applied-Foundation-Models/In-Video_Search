@@ -10,6 +10,15 @@ from transformers import BertModel, BertTokenizer
 
 
 def summarize(text):
+    """
+    Summarizes the given text using BERT-based extractive summarization.
+
+    Args:
+        text (str): The input text to be summarized.
+
+    Returns:
+        str: The most important sentence from the input text as the summary.
+    """
     nltk.download("punkt")
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
     model = BertModel.from_pretrained("bert-base-uncased")
