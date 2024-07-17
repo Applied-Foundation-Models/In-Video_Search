@@ -9,15 +9,15 @@ from loguru import logger
 def get_file_mapping():
     return {
         "Biology 1": {
-            "pickle_file": "biology_chapter_3_3_treshhold_5.pickle",
+            "pickle_file": "app/embeddings/biology_chapter_3_3_treshhold_5.pickle",
             "video_url": "data/raw/biology_chapter_3_3_treshhold_5/biology_chapter_3_3_treshhold_5.mp4",
         },
         "Biology 2": {
-            "pickle_file": "ch7_soil_agriculture.pickle",
+            "pickle_file": "app/embeddings/ch7_soil_agriculture.pickle",
             "video_url": "data/raw/ch7_soil_agriculture/ch7_soil_agriculture.mp4",
         },
         "Math 1": {
-            "pickle_file": "math_1.pickle",
+            "pickle_file": "app/embeddings/math_1.pickle",
             "video_url": "data/raw/math_1/math_1.mp4",
         },
     }
