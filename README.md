@@ -1,40 +1,41 @@
-# afm-vlm
+# In-Video Search Using Text Prompts in University Lectures
 
---------------------
-Project Organization
---------------------
+This project was conducted as part of the Practical Course: Applied Foundation Models in Computer Vision at the Computer Vision group of Professor Daniel Cremers. The focus is on exploring in-video search using text prompts, applied to university lectures which are inherently multi-modal. Searching within long university lectures represents a suitable use case for this technology. We developed a full pipeline with a visual interface.
 
-    ├── data
-    │   ├── input          <- Ordner für Eingabedaten
-    │   ├── metadata       <- Ordner für zwischengespeicherte Metadaten.
-    │   └── output         <- Ordner für Ausgabedaten.
-    │
-    ├── docker             <- Hier werden die Docker Container abgelegt.
-    │
-    ├── docs               <- Unsere Dokumenation von TOS.
-    │
-    ├── models             <- Von TOS genutzte Modelle.
-    │
-    ├── notebooks          <- Jupyter notebooks.
-    │
-    ├── src                <- Source code, um TOS zu benutzen.
-    │   ├── setup.py       <- Macht das Projekt durch pip installierbar (pip install -e .).
-    │   ├── scripts        <- Scripts die nicht zu TOS gehören.
-    │   │   └── app               <- Streamlit Webseite von TOS.
-    │   │
-    │   └── tos            <- Das ist TOS!
-    │       ├── data              <- Module zum bearbeiten, analysieren oder generieren von Daten.
-    │       ├── features          <- Module, um aus Rohdaten Features für Modelle zu generieren.
-    │       ├── models            <- Module, um Modelle zu trainieren und einzusetzen.
-    │       └── visualization     <- Module für die Visualisierung von Ergebnissen.
-    │
-    ├── tests              <- Ordner für Tests und Testdaten
-    │
-    ├── pyproject.toml     <- Für die Entwicklungsumgebung erforderliche Module.
-    │
-    └── README.md          <- Dieses Dokument.
+## Methodology
 
---------
+![Pipeline overview](visuals/pipeline_overview.png)
+
+## Project Overview
+
+We explored a complete pipeline for in-video search using text prompts. The key steps are:
+
+1. **Video Preprocessing**: Downloading and automatically extracting keyframes (~80-100 per lecture) from YouTube lecture videos (~1 hour length).
+
+2. **Information Extraction**: The keyframes are processed to extract different modalities using the following foundational model architectures:
+
+  - [Whisper](https://github.com/openai/whisper) for Audio Transcriptions
+  - [LLAVA](https://llava-vl.github.io/) as Visual Language Models (VLM) for image captioning
+  - Optical Character Recognition (OCR) library for text extraction
+
+3. **Information Aggregation**: The keyframes are summarized using the [LLAMA 3-7b](https://llama.meta.com/llama3/) model.
+
+4. **Data Embedding**: Embedding lecture content.
+5. **Data Retrieval**: Matching keyframes based on user prompts and displaying results in a graphical user interface (GUI).
+
+## Getting Started
+
+### Prerequisites
+
+1. **Install FFmpeg**
+
+   More information on how to install FFmpeg can be found [here](https://ffmpeg.org/download.html).
+
+2. **Install Ollama**
+
+   All models are run locally. Instructions can be found [here](https://github.com/ollama/ollama).
+
+### Installation
 
 Getting started
 ---------------
@@ -49,93 +50,14 @@ poetry config virtualenvs.in-project true   // only for the first execution
 poetry install                              // only for the first execution
 ```
 
-### Installation Steps
+## Running the Pipeline
 
-## 1. Install FFmpeg
-
-- More infos on how to install FFmpeg can be found [here](https://ffmpeg.org/download.html).
-
-## 2. Install Tesseract
-
-- More infos on how to install Tesseract can be found [here](https://github.com/UB-Mannheim/tesseract/wiki).
-
-## Run the full pipeline:
-
-Run the pipeline.ipynb notebook
-
-## Downloading Videos from YouTube
-
-This pipeline downloads a video from YouTube, segments it into specified chunks, and generates transcriptions for each
-segment. The results are saved in the data folder. Below are the available command line arguments and their
-explanations:
-
-- **`-n`** or **`--name`**: Specifies the name of the output files.
-- **`-ch`** or **`--chunk`**: Defines the length of each video chunk in seconds. If this is not defined, the video will
-  not be split.
-- **`-url`**: The URL of the YouTube video to download.
-
-### Example Command
-
-Use the following command to download, chunk, and transcribe a video:
-
-```shell
-python src/video_preprocessing/download_videos/youtube_download.py -n hitched -ch 30 -url https://www.youtube.com/watch\?v\=r11Lr4FILX8
+Follow the steps in `data_generation_pipeline.ipynb` notebook to download and process the videos.
 
 
-python scene_detect.py -base_path /Users/magic-rabbit/Documents/AFM/afm-vlm/data/raw/hitch_v4/video_chunks/
-```
+Test Search performance:
 
-## Video Preprocessing: Pixel Difference Method
-
-```shell
-python keyframe_extraction_pixel_difference.py --video_path [path_to_video] --threshold [sensitivity]
-
-```
-
-Parameters
-
-- --video_path (required): Path to the video file.
-- --threshold (optional): Sensitivity threshold for detecting changes between frames. The default is 0.2.
-
-## Video Preprocessing: Fixed Time Interval Extraction Method
-
-```shell
-python frame_extractor.py --video_path [path_to_your_video] --timestamp [start_time_in_seconds] --interval [time_interval_in_seconds]
-```
-
-Parameters
-
-- --video_path (required): Path to the video file.
-- --timestamp (optional): Start time in seconds for extracting frames. The default is 0 seconds.
-- --interval (optional): Time interval in seconds for extracting frames. The default is 1 second.
-
-## LLM Model: BART
-
-```shell
-python bart_summarizer.py "Another long text for summarization."
-```
-
-## LLM Model: Bert
-
-```shell
-python bert_summarizer.py "Your long text goes here."
-```
-
-## LLAVA Textual description of Visual features
-
-```shell
-cd src/llm/ollama_implementation/
-
-# To demo captioning using llava
-
-python ollama_experiment.py --llava_captioning
-
-# To demo summarizing using prompting_templates
-
-python ollama_experiment.py --prompt_llm_summary
-
-```
-
+Run the `retrieve_data.ipynb` notebook for data retrieval.
 
 
 # Running the Streamlit Frontend
