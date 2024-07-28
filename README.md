@@ -63,3 +63,4 @@ To run the frontend using Streamlit, please follow these steps:
 
    ```bash
    streamlit run app.py
+   ```
