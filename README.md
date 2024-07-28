@@ -37,9 +37,6 @@ We explored a complete pipeline for in-video search using text prompts. The key 
 
 ### Installation
 
-Getting started
----------------
-
 ```shell
 pip install poetry                          // only for the first execution
 poetry lock                                 // only for the first execution
@@ -52,20 +49,17 @@ poetry install                              // only for the first execution
 
 ## Running the Pipeline
 
-Follow the steps in `data_generation_pipeline.ipynb` notebook to download and process the videos.
+Make sure you have Ollama running !
 
+Follow the steps in `data_generation_pipeline.ipynb` notebook to download process & embed the videos.
 
-Test Search performance:
+To test the  Search performance:
 
 Run the `retrieve_data.ipynb` notebook for data retrieval.
 
-
 # Running the Streamlit Frontend
 
-To run the frontend, follow these steps:
+To run the frontend using Streamlit, please follow these steps:
 
-1. Ensure you have [Streamlit](https://streamlit.io/) installed. If not, you can install it using pip:
    ```bash
-   pip install streamlit
    streamlit run app.py
-  ```
