@@ -73,12 +73,6 @@ class EmbeddingsModel:
 
         print(f"Query:{query_text_embedding}")
 
-        logger.info(f"Query text embedding shape: {query_text_embedding.shape}")
-        logger.info(f"Text embeddings shape: {text_embeddings.shape}")
-
-        logger.info(f"Device of query_text_embedding: {query_text_embedding.device}")
-        logger.info(f"Device of text_embeddings: {text_embeddings.device}")
-
         # Compute cosine similarity between query text and all text embeddings
         similarities = cosine_similarity(query_text_embedding, text_embeddings, dim=1)
         logger.info(f"Similarities done: {similarities}")
