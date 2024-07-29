@@ -41,10 +41,8 @@ We explored a complete pipeline for in-video search using text prompts. The key 
 pip install poetry                          // only for the first execution
 poetry lock                                 // only for the first execution
 
-.venv\Scripts\activate
-
-poetry config virtualenvs.in-project true   // only for the first execution
 poetry install                              // only for the first execution
+poetry config virtualenvs.in-project true   // only for the first execution
 ```
 
 ## Running the Pipeline
