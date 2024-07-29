@@ -1,8 +1,7 @@
-import pickle
-
 import streamlit as st
 import torch
 from loguru import logger
+from PIL import Image
 
 
 # Function to return the file mapping
@@ -84,6 +83,18 @@ def update_selection():
     logger.info("Video querying - DONE")
     # Rerun app
     st.rerun()
+
+
+def display_results(selected_results):
+    for i, result in enumerate(selected_results):
+        path_to_image = query_video_data(
+            st.session_state["data"], result[i], "img_path"
+        )
+        open_image(path_to_image)
+
+def open_image(path):
+    opened_image = Image.open(path)
+    return opened_image
 
 
 def retrieve_keys_from_indices(list_retrieval, key_to_index_mapping):
