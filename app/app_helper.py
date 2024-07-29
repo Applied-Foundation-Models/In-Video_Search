@@ -1,3 +1,5 @@
+import pickle
+
 import streamlit as st
 import torch
 from loguru import logger
@@ -91,6 +93,7 @@ def display_results(selected_results):
             st.session_state["data"], result[i], "img_path"
         )
         open_image(path_to_image)
+
 
 def open_image(path):
     opened_image = Image.open(path)
