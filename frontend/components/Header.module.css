@@ -1,0 +1,21 @@
+/* components/Header.module.css
+.header {
+  background-color: #133;
+  color: white;
+  padding: 1rem;
+}
+
+.navList {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+}
+
+.navItem a {
+  color: white;
+  text-decoration: none;
+}
+
+.navItem a:hover {
+  text-decoration: underline;
+} */
